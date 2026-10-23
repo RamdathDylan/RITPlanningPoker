@@ -25,9 +25,10 @@ const join = (app, code, name, ip = "203.0.113.1") =>
     role: "voter",
   });
 
+afterAll(() => pool.end());
+
 describe("rate limits", () => {
   beforeEach(resetDatabase);
-  afterAll(() => pool.end());
 
   it("allows 5 room creations per IP per 10 minutes, then answers 429", async () => {
     const app = buildApp();

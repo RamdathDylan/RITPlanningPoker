@@ -27,3 +27,12 @@ export async function findRoomByCode(db, code) {
   );
   return rows[0] ?? null;
 }
+
+// "Live" means not ended and used within the last day; the cap protects the server's memory.
+export async function countLiveRooms(db) {
+  const { rows } = await db.query(
+    `SELECT count(*)::integer AS count FROM rooms
+     WHERE status <> 'ended' AND last_activity_at > now() - interval '1 day'`,
+  );
+  return rows[0].count;
+}

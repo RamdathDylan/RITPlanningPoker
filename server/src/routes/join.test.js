@@ -12,7 +12,7 @@ const pool = createAppPool();
 
 function buildApp() {
   const roomService = createRoomService({ pool, handoffMs: 60_000 });
-  const router = createRoomsRouter({ pool, roomService });
+  const router = createRoomsRouter({ pool, roomService, config: testConfig() });
   return {
     app: createApp({ config: testConfig(), logger: createFakeLogger(), apiRouters: [router] }),
     roomService,

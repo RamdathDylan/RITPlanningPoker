@@ -4,7 +4,8 @@ import { errorFor } from "../../../shared/errors.js";
 import { parseJoinCode } from "../../../shared/join-code.js";
 import { CREATE_ROOM_BODY, JOIN_ROOM_BODY } from "../../../shared/requests.js";
 import { generateRejoinToken, hashToken } from "../auth/tokens.js";
-import { findRoomByCode, insertRoomWithFacilitator } from "../db/rooms.js";
+import { countLiveRooms, findRoomByCode, insertRoomWithFacilitator } from "../db/rooms.js";
+import { createRateLimiter } from "../middleware/rate-limit.js";
 import { validateBody } from "../middleware/validate.js";
 import { generateJoinCode } from "../rooms/code.js";
 
@@ -46,29 +47,46 @@ function sendError(response, status, code) {
 export function createRoomsRouter({
   pool,
   roomService,
+  config,
   now = Date.now,
   generateCode = generateJoinCode,
 }) {
   const router = express.Router();
-
-  router.post("/rooms", validateBody(CREATE_ROOM_BODY), async (_request, response) => {
-    const { roomName, displayName } = response.locals.body;
-    const rejoinToken = generateRejoinToken();
-    const facilitator = { id: randomUUID(), displayName, tokenHash: hashToken(rejoinToken) };
-
-    const code = await insertWithUnusedCode(pool, generateCode, {
-      roomId: randomUUID(),
-      name: roomName,
-      facilitator,
-      now: now(),
-    });
-
-    // The token is returned once and never logged; only its hash is stored.
-    response.status(201).json({ code, participantId: facilitator.id, rejoinToken });
+  const { rateLimits } = config;
+  const createLimiter = createRateLimiter({
+    windowMs: 10 * 60_000,
+    limit: rateLimits.roomCreatesPer10Minutes,
   });
+  const joinLimiter = createRateLimiter({ windowMs: 60_000, limit: rateLimits.joinsPerMinute });
+
+  router.post(
+    "/rooms",
+    createLimiter,
+    validateBody(CREATE_ROOM_BODY),
+    async (_request, response) => {
+      if ((await countLiveRooms(pool)) >= config.maxLiveRooms) {
+        sendError(response, 503, "CAPACITY");
+        return;
+      }
+      const { roomName, displayName } = response.locals.body;
+      const rejoinToken = generateRejoinToken();
+      const facilitator = { id: randomUUID(), displayName, tokenHash: hashToken(rejoinToken) };
+
+      const code = await insertWithUnusedCode(pool, generateCode, {
+        roomId: randomUUID(),
+        name: roomName,
+        facilitator,
+        now: now(),
+      });
+
+      // The token is returned once and never logged; only its hash is stored.
+      response.status(201).json({ code, participantId: facilitator.id, rejoinToken });
+    },
+  );
 
   router.post(
     "/rooms/:code/participants",
+    joinLimiter,
     validateBody(JOIN_ROOM_BODY),
     async (request, response) => {
       const code = parseJoinCode(request.params.code);
