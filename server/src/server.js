@@ -3,6 +3,8 @@ import { Server } from "socket.io";
 import { createApp } from "./app.js";
 import { createRoomsRouter } from "./routes/rooms.js";
 import { createSocketAuth } from "./sockets/auth.js";
+import { createBroadcaster } from "./sockets/broadcast.js";
+import { registerConnectionHandlers } from "./sockets/connection.js";
 
 // Large enough for 50 story titles of 200 characters; anything bigger is dropped by the
 // transport before our code runs (threat model T-22).
@@ -16,6 +18,8 @@ export function createServer({ config, logger, pool, roomService }) {
     cors: { origin: config.clientOrigin },
   });
   io.use(createSocketAuth({ pool, logger }));
+  registerConnectionHandlers({ io, roomService, logger });
+  createBroadcaster({ io, roomService });
 
   return {
     io,
