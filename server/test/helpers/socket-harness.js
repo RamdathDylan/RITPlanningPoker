@@ -66,7 +66,12 @@ export async function startTestServer({ configOverrides = {}, persistChange } = 
     return { participantId: participant.id, token };
   }
 
+  let closed = false;
   async function close() {
+    if (closed) {
+      return;
+    }
+    closed = true;
     for (const socket of clients) {
       socket.disconnect();
     }
@@ -75,7 +80,23 @@ export async function startTestServer({ configOverrides = {}, persistChange } = 
     await pool.end();
   }
 
-  return { url, logger, pool, roomService, server, connectClient, seedRoom, addParticipant, close };
+  // Lets a test shut the server down itself (e.g. with the real shutdown sequence).
+  function markClosed() {
+    closed = true;
+  }
+
+  return {
+    url,
+    logger,
+    pool,
+    roomService,
+    server,
+    connectClient,
+    seedRoom,
+    addParticipant,
+    close,
+    markClosed,
+  };
 }
 
 export function waitFor(socket, event, { timeoutMs = 2000 } = {}) {
