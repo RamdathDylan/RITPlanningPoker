@@ -5,6 +5,7 @@ import CreateRoomPage from "./pages/CreateRoomPage.jsx";
 import JoinRoomPage from "./pages/JoinRoomPage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
+import PrivacyPage from "./pages/PrivacyPage.jsx";
 import RoomPage from "./pages/RoomPage.jsx";
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/new" element={<CreateRoomPage />} />
         <Route path="/join/:code?" element={<JoinRoomPage />} />
         <Route path="/room/:code" element={<RoomPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <SiteFooter />
