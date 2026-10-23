@@ -26,7 +26,7 @@ describe("the app's database role (pp_app)", () => {
   it("can insert, select, update, and delete application data", async () => {
     await app.query("SAVEPOINT data_access");
     const { rows } = await app.query(
-      "INSERT INTO rooms (join_code, name) VALUES ('PRIVTEST', 'Privileges') RETURNING id",
+      "INSERT INTO rooms (join_code, name) VALUES ('PRVTESTS', 'Privileges') RETURNING id",
     );
     await app.query("UPDATE rooms SET name = 'Renamed' WHERE id = $1", [rows[0].id]);
     const selected = await app.query("SELECT name FROM rooms WHERE id = $1", [rows[0].id]);

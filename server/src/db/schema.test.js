@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -65,9 +66,11 @@ describe("initial schema", () => {
     await schema.drop();
   });
 
-  it("applies to an empty database", async () => {
-    const { rows } = await client.query("SELECT name FROM schema_migrations");
-    expect(rows.map((row) => row.name)).toEqual(["001-initial-schema.sql"]);
+  it("applies every migration file to an empty database", async () => {
+    const files = (await readdir(migrationsDir)).filter((file) => file.endsWith(".sql")).sort();
+    const { rows } = await client.query("SELECT name FROM schema_migrations ORDER BY name");
+    expect(files[0]).toBe("001-initial-schema.sql");
+    expect(rows.map((row) => row.name)).toEqual(files);
   });
 
   it("creates a room and its facilitator in one transaction", async () => {
