@@ -53,3 +53,15 @@ test.describe("join room page", () => {
     await expect(page).toHaveURL("/join/ABCDEFGH");
   });
 });
+
+test.describe("privacy page", () => {
+  for (const colorScheme of ["light", "dark"]) {
+    test(`is reachable from the footer and accessible (${colorScheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.goto("/");
+      await page.getByRole("contentinfo").getByRole("link", { name: "Privacy" }).click();
+      await expect(page.getByRole("heading", { level: 1, name: "Privacy" })).toBeVisible();
+      await expectNoA11yViolations(page);
+    });
+  }
+});
