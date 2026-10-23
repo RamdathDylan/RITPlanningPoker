@@ -4,9 +4,13 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "express": "5.3.0",
     "pg": "8.23.1"
   },
   "scripts": {
     "migrate": "node --env-file-if-exists=../.env src/db/migrate-cli.js"
+  },
+  "devDependencies": {
+    "supertest": "7.3.1"
   }
 }
