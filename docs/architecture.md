@@ -8,15 +8,15 @@ This is an independent student project. It is **not affiliated with, endorsed by
 
 ## 1. Requirements summary
 
-| Area | Decision |
-|---|---|
-| Users | Scrum teams of 4–10 in RIT classes. Up to 50 seats per room, about 30 rooms live at once |
+| Area     | Decision                                                                                          |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| Users    | Scrum teams of 4–10 in RIT classes. Up to 50 seats per room, about 30 rooms live at once          |
 | Identity | Guests only. A display name plus a random rejoin token in localStorage. No accounts, no RIT login |
-| Roles | Facilitator (votes by default, can switch to observer), voter, observer |
-| Deck | Fibonacci only: `0 1 2 3 5 8 13 21 ? ☕` |
-| Stories | Added one at a time, or pasted as many lines at once |
-| Hosting | Self-hosted by Dylan: one machine running Docker Compose behind an HTTPS reverse proxy |
-| Timeline | MVP used in a real class next semester, about 10–14 weeks at 6–8 hours a week |
+| Roles    | Facilitator (votes by default, can switch to observer), voter, observer                           |
+| Deck     | Fibonacci only: `0 1 2 3 5 8 13 21 ? ☕`                                                          |
+| Stories  | Added one at a time, or pasted as many lines at once                                              |
+| Hosting  | Self-hosted by Dylan: one machine running Docker Compose behind an HTTPS reverse proxy            |
+| Timeline | MVP used in a real class next semester, about 10–14 weeks at 6–8 hours a week                     |
 
 Non-functional targets:
 
@@ -115,24 +115,24 @@ stateDiagram-v2
 
 This table is the specification for the state-machine tests, and the tests are written from it first (see testing-strategy §3). "Actor" is checked against server state, never against anything the client claims.
 
-| Action | Actor | Allowed status | Guards (rejection code) | Result |
-|---|---|---|---|---|
-| `participantJoined` | system (HTTP join) | not `ended` | seats < 50 (`ROOM_FULL`); normalized name unique in room (`NAME_TAKEN`) | new seat, `connected: false` |
-| `participantConnected` | system | any | participant exists | `connected: true`, `connectedAt = now`; cancels handoff timer if it is the facilitator |
-| `participantDisconnected` | system | any | last socket of that participant | `connected: false`, `disconnectedAt = now`; starts 60 s handoff timer if it is the facilitator |
-| `participantLeft` | self | any | — | seat removed, open-round vote removed; if facilitator, immediate handoff |
-| `participantRemoved` | facilitator | any | target exists, target ≠ actor (`INVALID_TARGET`) | seat removed, vote removed, target's sockets disconnected |
-| `roleChanged` | self | not `ended` | role ∈ {voter, observer} | role set; switching to observer removes open-round vote |
-| `storiesAdded` | facilitator | not `ended` | 1–50 titles per call; room total ≤ 200 (`STORY_LIMIT`) | stories appended with `status: pending` |
-| `storySelected` | facilitator | `idle`, `voting`, `revealed` | story exists in room (`NOT_FOUND`) | new round (number = previous + 1 for that story), votes empty, status `voting`; any open round is abandoned |
-| `voteCast` | voter | `voting` | `roundId` = current (`STALE_ROUND`); value ∈ deck (`INVALID_PAYLOAD`) | own vote set or replaced |
-| `voteCleared` | voter | `voting` | `roundId` = current; has a vote (`NO_VOTE`) | own vote removed |
-| `roundRevealed` | facilitator | `voting` | `roundId` = current; ≥ 1 vote (`NO_VOTES`) | `revealedAt = now`, status `revealed` |
-| `roundRevoted` | facilitator | `revealed` | `roundId` = current | new round for same story, status `voting` |
-| `estimateAccepted` | facilitator | `revealed` | story is current; value is a numeric deck card | story `estimated` with `finalEstimate`; `currentStoryId = null`; status `idle` |
-| `facilitatorTransferred` | facilitator | not `ended` | target is a current participant | `facilitatorId = target` |
-| `facilitatorHandoff` | system (timer) | not `ended` | facilitator still disconnected and `now − disconnectedAt ≥ 60 s` | `facilitatorId` = earliest-joined **connected** participant; unchanged if nobody is connected |
-| `roomEnded` | facilitator | not `ended` | — | status `ended`; room becomes read-only |
+| Action                    | Actor              | Allowed status               | Guards (rejection code)                                                 | Result                                                                                                      |
+| ------------------------- | ------------------ | ---------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `participantJoined`       | system (HTTP join) | not `ended`                  | seats < 50 (`ROOM_FULL`); normalized name unique in room (`NAME_TAKEN`) | new seat, `connected: false`                                                                                |
+| `participantConnected`    | system             | any                          | participant exists                                                      | `connected: true`, `connectedAt = now`; cancels handoff timer if it is the facilitator                      |
+| `participantDisconnected` | system             | any                          | last socket of that participant                                         | `connected: false`, `disconnectedAt = now`; starts 60 s handoff timer if it is the facilitator              |
+| `participantLeft`         | self               | any                          | —                                                                       | seat removed, open-round vote removed; if facilitator, immediate handoff                                    |
+| `participantRemoved`      | facilitator        | any                          | target exists, target ≠ actor (`INVALID_TARGET`)                        | seat removed, vote removed, target's sockets disconnected                                                   |
+| `roleChanged`             | self               | not `ended`                  | role ∈ {voter, observer}                                                | role set; switching to observer removes open-round vote                                                     |
+| `storiesAdded`            | facilitator        | not `ended`                  | 1–50 titles per call; room total ≤ 200 (`STORY_LIMIT`)                  | stories appended with `status: pending`                                                                     |
+| `storySelected`           | facilitator        | `idle`, `voting`, `revealed` | story exists in room (`NOT_FOUND`)                                      | new round (number = previous + 1 for that story), votes empty, status `voting`; any open round is abandoned |
+| `voteCast`                | voter              | `voting`                     | `roundId` = current (`STALE_ROUND`); value ∈ deck (`INVALID_PAYLOAD`)   | own vote set or replaced                                                                                    |
+| `voteCleared`             | voter              | `voting`                     | `roundId` = current; has a vote (`NO_VOTE`)                             | own vote removed                                                                                            |
+| `roundRevealed`           | facilitator        | `voting`                     | `roundId` = current; ≥ 1 vote (`NO_VOTES`)                              | `revealedAt = now`, status `revealed`                                                                       |
+| `roundRevoted`            | facilitator        | `revealed`                   | `roundId` = current                                                     | new round for same story, status `voting`                                                                   |
+| `estimateAccepted`        | facilitator        | `revealed`                   | story is current; value is a numeric deck card                          | story `estimated` with `finalEstimate`; `currentStoryId = null`; status `idle`                              |
+| `facilitatorTransferred`  | facilitator        | not `ended`                  | target is a current participant                                         | `facilitatorId = target`                                                                                    |
+| `facilitatorHandoff`      | system (timer)     | not `ended`                  | facilitator still disconnected and `now − disconnectedAt ≥ 60 s`        | `facilitatorId` = earliest-joined **connected** participant; unchanged if nobody is connected               |
+| `roomEnded`               | facilitator        | not `ended`                  | —                                                                       | status `ended`; room becomes read-only                                                                      |
 
 Any action from the wrong actor returns `FORBIDDEN`. Any action in the wrong status returns `INVALID_STATE`. All rejections leave state unchanged.
 
@@ -164,48 +164,48 @@ The source of truth will be `shared/events.js`, built in roadmap PR 2.x. This ta
 
 ### 5.2 Client → server
 
-| Event | Payload | Validation | Authorization |
-|---|---|---|---|
-| `room:join` | `{ code }` | 8 chars of the code alphabet, dash optional | token's participant belongs to the room with this code; room not deleted |
-| `room:leave` | `{}` | — | seated participant |
-| `story:add` | `{ titles }` | array of 1–50 strings; each 1–200 chars after normalization | facilitator; room total ≤ 200 |
-| `story:select` | `{ storyId }` | UUID | facilitator |
-| `vote:cast` | `{ roundId, value }` | UUID; value ∈ `["0","1","2","3","5","8","13","21","?","☕"]` | role `voter`; status `voting`; round current |
-| `vote:clear` | `{ roundId }` | UUID | role `voter`; status `voting` |
-| `round:reveal` | `{ roundId }` | UUID | facilitator; status `voting` |
-| `round:revote` | `{ roundId }` | UUID | facilitator; status `revealed` |
-| `estimate:accept` | `{ storyId, value }` | UUID; numeric deck value | facilitator; status `revealed` |
-| `participant:remove` | `{ participantId }` | UUID | facilitator; not self |
-| `participant:setRole` | `{ role }` | `voter` or `observer` | self |
-| `facilitator:transfer` | `{ participantId }` | UUID | facilitator |
-| `room:end` | `{}` | — | facilitator |
-| `room:delete` | `{ code }` | must equal the room's code (typed confirmation) | facilitator |
+| Event                  | Payload              | Validation                                                   | Authorization                                                            |
+| ---------------------- | -------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| `room:join`            | `{ code }`           | 8 chars of the code alphabet, dash optional                  | token's participant belongs to the room with this code; room not deleted |
+| `room:leave`           | `{}`                 | —                                                            | seated participant                                                       |
+| `story:add`            | `{ titles }`         | array of 1–50 strings; each 1–200 chars after normalization  | facilitator; room total ≤ 200                                            |
+| `story:select`         | `{ storyId }`        | UUID                                                         | facilitator                                                              |
+| `vote:cast`            | `{ roundId, value }` | UUID; value ∈ `["0","1","2","3","5","8","13","21","?","☕"]` | role `voter`; status `voting`; round current                             |
+| `vote:clear`           | `{ roundId }`        | UUID                                                         | role `voter`; status `voting`                                            |
+| `round:reveal`         | `{ roundId }`        | UUID                                                         | facilitator; status `voting`                                             |
+| `round:revote`         | `{ roundId }`        | UUID                                                         | facilitator; status `revealed`                                           |
+| `estimate:accept`      | `{ storyId, value }` | UUID; numeric deck value                                     | facilitator; status `revealed`                                           |
+| `participant:remove`   | `{ participantId }`  | UUID                                                         | facilitator; not self                                                    |
+| `participant:setRole`  | `{ role }`           | `voter` or `observer`                                        | self                                                                     |
+| `facilitator:transfer` | `{ participantId }`  | UUID                                                         | facilitator                                                              |
+| `room:end`             | `{}`                 | —                                                            | facilitator                                                              |
+| `room:delete`          | `{ code }`           | must equal the room's code (typed confirmation)              | facilitator                                                              |
 
 The last five events are new relative to CLAUDE.md. The proposed CLAUDE.md edit adds them.
 
 ### 5.3 Server → client
 
-| Event | To | Payload |
-|---|---|---|
-| `room:state` | one socket | `{ room: { code, name, status, facilitatorId, currentStoryId }, me: { participantId, role, isFacilitator, myVote }, participants: [{ id, displayName, role, connected, hasVoted }], stories: [{ id, title, status, finalEstimate, position }], round: { id, number, revealed, votes?, stats? } \| null }` |
-| `participant:update` | room | `{ participants, facilitatorId }` |
-| `vote:status` | room | `{ roundId, votedIds: [participantId] }` |
-| `round:revealed` | room | `{ roundId, votes: [{ participantId, value }], stats }` |
-| `story:update` | room | `{ stories, currentStoryId, status, round: { id, number } \| null }` |
-| `room:ended` | room | `{}` |
-| `room:removed` | one socket | `{ reason: "kicked" \| "deleted" }`; the server then disconnects the socket |
-| `error` | one socket | `{ code, message }`, only for errors with no ack, such as a handshake failure |
+| Event                | To         | Payload                                                                                                                                                                                                                                                                                                   |
+| -------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `room:state`         | one socket | `{ room: { code, name, status, facilitatorId, currentStoryId }, me: { participantId, role, isFacilitator, myVote }, participants: [{ id, displayName, role, connected, hasVoted }], stories: [{ id, title, status, finalEstimate, position }], round: { id, number, revealed, votes?, stats? } \| null }` |
+| `participant:update` | room       | `{ participants, facilitatorId }`                                                                                                                                                                                                                                                                         |
+| `vote:status`        | room       | `{ roundId, votedIds: [participantId] }`                                                                                                                                                                                                                                                                  |
+| `round:revealed`     | room       | `{ roundId, votes: [{ participantId, value }], stats }`                                                                                                                                                                                                                                                   |
+| `story:update`       | room       | `{ stories, currentStoryId, status, round: { id, number } \| null }`                                                                                                                                                                                                                                      |
+| `room:ended`         | room       | `{}`                                                                                                                                                                                                                                                                                                      |
+| `room:removed`       | one socket | `{ reason: "kicked" \| "deleted" }`; the server then disconnects the socket                                                                                                                                                                                                                               |
+| `error`              | one socket | `{ code, message }`, only for errors with no ack, such as a handshake failure                                                                                                                                                                                                                             |
 
 Transport limits: Socket.IO `maxHttpBufferSize` is 64 KB, enough for 50 titles of 200 characters. A participant may have at most 10 open sockets, one per tab.
 
 ## 6. HTTP API
 
-| Route | Body / auth | Success | Limits |
-|---|---|---|---|
-| `POST /api/rooms` | `{ roomName ≤ 60, displayName ≤ 40 }` | `201 { code, participantId, rejoinToken }` | 5 per 10 min per IP; 503 `CAPACITY` past 200 live rooms |
-| `POST /api/rooms/:code/participants` | `{ displayName ≤ 40, role }` | `201 { participantId, rejoinToken }` | 60 per min per IP (sized for a class sharing one IP, see threat model T-09) |
-| `GET /api/rooms/:code/export.csv` | `Authorization: Bearer <token>` of the facilitator | `200 text/csv` attachment | 10 per min per IP |
-| `GET /health` | — | `200 { "status": "ok" }` | none |
+| Route                                | Body / auth                                        | Success                                    | Limits                                                                      |
+| ------------------------------------ | -------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------- |
+| `POST /api/rooms`                    | `{ roomName ≤ 60, displayName ≤ 40 }`              | `201 { code, participantId, rejoinToken }` | 5 per 10 min per IP; 503 `CAPACITY` past 200 live rooms                     |
+| `POST /api/rooms/:code/participants` | `{ displayName ≤ 40, role }`                       | `201 { participantId, rejoinToken }`       | 60 per min per IP (sized for a class sharing one IP, see threat model T-09) |
+| `GET /api/rooms/:code/export.csv`    | `Authorization: Bearer <token>` of the facilitator | `200 text/csv` attachment                  | 10 per min per IP                                                           |
+| `GET /health`                        | —                                                  | `200 { "status": "ok" }`                   | none                                                                        |
 
 Unknown, ended-and-purged, and deleted codes all return the same `404 { error: "Room not found" }`. JSON bodies are capped at 10 KB. Errors are generic, and stack traces appear only in server logs.
 
@@ -466,17 +466,17 @@ sequenceDiagram
 
 Every screen defines all four states: loading, empty, error, and disconnected.
 
-| Screen | Route | Contents | Empty / error / disconnected |
-|---|---|---|---|
-| Landing | `/` | "Create a room" and "Join a room" (code field); short description; footer with privacy link and "Not affiliated with RIT" | Error banner if the API is unreachable |
-| Create room | `/new` | Room name, your display name, submit | Inline field errors (`aria-describedby`); 429/503 message |
-| Join | `/join/:code?` | Code (prefilled from link), display name, "Join as observer" checkbox | "Room not found", "Name taken", "Room full" |
-| Voting room | `/room/:code` | Header (room name, code + copy-link button), current story, card deck, who-has-voted list, facilitator bar (Reveal, Revote, Next story) | No story selected: facilitator sees "Add or pick a story", others see "Waiting for the facilitator". Disconnected: banner, controls disabled |
-| Backlog panel | inside room | Story list with status and estimate; add field and paste-many textarea (facilitator) | Empty: "No stories yet" |
-| Revealed | inside room | Cards face-up beside names, stats (average, median, range, consensus), facilitator picks the estimate (median preselected) and accepts | — |
-| Summary | `/room/:code` when ended | Estimated stories table, CSV export (facilitator), delete room | — |
-| Not found / removed / ended | `/room/:code` | Plain explanation and a link home | — |
-| Privacy | `/privacy` | What is collected, why, retention (30 days + up to 7 days of backups), no tracking, contact | — |
+| Screen                      | Route                    | Contents                                                                                                                                | Empty / error / disconnected                                                                                                                 |
+| --------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Landing                     | `/`                      | "Create a room" and "Join a room" (code field); short description; footer with privacy link and "Not affiliated with RIT"               | Error banner if the API is unreachable                                                                                                       |
+| Create room                 | `/new`                   | Room name, your display name, submit                                                                                                    | Inline field errors (`aria-describedby`); 429/503 message                                                                                    |
+| Join                        | `/join/:code?`           | Code (prefilled from link), display name, "Join as observer" checkbox                                                                   | "Room not found", "Name taken", "Room full"                                                                                                  |
+| Voting room                 | `/room/:code`            | Header (room name, code + copy-link button), current story, card deck, who-has-voted list, facilitator bar (Reveal, Revote, Next story) | No story selected: facilitator sees "Add or pick a story", others see "Waiting for the facilitator". Disconnected: banner, controls disabled |
+| Backlog panel               | inside room              | Story list with status and estimate; add field and paste-many textarea (facilitator)                                                    | Empty: "No stories yet"                                                                                                                      |
+| Revealed                    | inside room              | Cards face-up beside names, stats (average, median, range, consensus), facilitator picks the estimate (median preselected) and accepts  | —                                                                                                                                            |
+| Summary                     | `/room/:code` when ended | Estimated stories table, CSV export (facilitator), delete room                                                                          | —                                                                                                                                            |
+| Not found / removed / ended | `/room/:code`            | Plain explanation and a link home                                                                                                       | —                                                                                                                                            |
+| Privacy                     | `/privacy`               | What is collected, why, retention (30 days + up to 7 days of backups), no tracking, contact                                             | —                                                                                                                                            |
 
 The voting screen shows only the story, the cards, who has voted, and facilitator controls. The backlog is a collapsible panel: a side column on desktop, a disclosure button on phones.
 
@@ -488,34 +488,34 @@ The palette is **RIT-inspired**: orange `#F76902`, black, and white, with neutra
 
 All ratios below were computed with the WCAG 2.1 relative-luminance formula. Requirements are 4.5:1 for text and 3:1 for UI component boundaries.
 
-| Token | Light | Ratio | Dark | Ratio |
-|---|---|---|---|---|
-| `--color-bg` | `#FFFFFF` | — | `#0F1115` | — |
-| `--color-surface` | `#F4F5F7` | — | `#181B21` | — |
-| `--color-surface-raised` | `#FFFFFF` | — | `#20242C` | — |
-| `--color-text` | `#1A1D23` | 16.9 on bg | `#E8EAED` | 15.7 on bg |
-| `--color-text-muted` | `#4B5563` | 6.9 on surface | `#A3A9B5` | 6.6 on raised |
-| `--color-accent-fill` (primary buttons, selected-card header) | `#F76902` | — | `#F76902` | — |
-| `--color-on-accent` | `#1A1D23` | 5.6 on fill | `#0F1115` | 6.3 on fill |
-| `--color-accent-text` (links, focus ring, selected border) | `#A84300` | 6.1 on bg, 5.5 on surface | `#FF8A3D` | 8.1 on bg, 6.6 on raised |
-| `--color-selected-bg` | `#FFE7D6` | text 14.2; border 5.1 | `#3A2414` | text 12.1 |
-| `--color-success` | `#15803D` | 5.0 | `#4ADE80` | 10.8 |
-| `--color-danger` | `#B91C1C` | 6.5 | `#F87171` | 6.8 |
-| `--color-warning` | `#A15C07` | 5.2 | `#FBBF24` | 11.3 |
-| `--color-border-strong` (inputs, cards) | `#6B7280` | 4.8 | `#8A919E` | 6.0 |
-| `--color-border-subtle` (decorative dividers only) | `#E5E7EB` | n/a | `#2A2F38` | n/a |
+| Token                                                         | Light     | Ratio                     | Dark      | Ratio                    |
+| ------------------------------------------------------------- | --------- | ------------------------- | --------- | ------------------------ |
+| `--color-bg`                                                  | `#FFFFFF` | —                         | `#0F1115` | —                        |
+| `--color-surface`                                             | `#F4F5F7` | —                         | `#181B21` | —                        |
+| `--color-surface-raised`                                      | `#FFFFFF` | —                         | `#20242C` | —                        |
+| `--color-text`                                                | `#1A1D23` | 16.9 on bg                | `#E8EAED` | 15.7 on bg               |
+| `--color-text-muted`                                          | `#4B5563` | 6.9 on surface            | `#A3A9B5` | 6.6 on raised            |
+| `--color-accent-fill` (primary buttons, selected-card header) | `#F76902` | —                         | `#F76902` | —                        |
+| `--color-on-accent`                                           | `#1A1D23` | 5.6 on fill               | `#0F1115` | 6.3 on fill              |
+| `--color-accent-text` (links, focus ring, selected border)    | `#A84300` | 6.1 on bg, 5.5 on surface | `#FF8A3D` | 8.1 on bg, 6.6 on raised |
+| `--color-selected-bg`                                         | `#FFE7D6` | text 14.2; border 5.1     | `#3A2414` | text 12.1                |
+| `--color-success`                                             | `#15803D` | 5.0                       | `#4ADE80` | 10.8                     |
+| `--color-danger`                                              | `#B91C1C` | 6.5                       | `#F87171` | 6.8                      |
+| `--color-warning`                                             | `#A15C07` | 5.2                       | `#FBBF24` | 11.3                     |
+| `--color-border-strong` (inputs, cards)                       | `#6B7280` | 4.8                       | `#8A919E` | 6.0                      |
+| `--color-border-subtle` (decorative dividers only)            | `#E5E7EB` | n/a                       | `#2A2F38` | n/a                      |
 
 The bright orange alone is never a meaningful boundary on light surfaces, where it is only 2.8:1. Selected cards use the `--color-accent-text` border plus a check mark and the word "Selected".
 
-| Group | Tokens |
-|---|---|
-| Type | `--font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`; sizes 0.75 / 0.875 / 1 / 1.25 / 1.5 / 2 / 2.5 rem (ratio ≈ 1.25); weights 400 / 600 / 700; line height 1.5 body, 1.2 headings |
-| Spacing | 4 px base: `--space-1` 0.25rem … `--space-8` 4rem (4, 8, 12, 16, 24, 32, 48, 64 px) |
-| Radius | `--radius-sm` 4px, `--radius-md` 8px, `--radius-lg` 12px, `--radius-pill` 999px |
-| Shadow | `--shadow-1/2/3` for raised, card, and dialog. Dark mode uses lower-opacity shadows plus a `--color-border-subtle` outline |
-| Motion | `--duration-fast` 120ms, `--duration-base` 200ms, `--duration-flip` 400ms, `--ease-standard` `cubic-bezier(.2,0,0,1)`; under `prefers-reduced-motion: reduce` all durations become 0ms and the card flip becomes an instant swap |
-| Focus | `--focus-ring: 3px solid var(--color-accent-text)` with 2px offset, on `:focus-visible` |
-| Touch | `--target-min: 44px` |
+| Group   | Tokens                                                                                                                                                                                                                           |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Type    | `--font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`; sizes 0.75 / 0.875 / 1 / 1.25 / 1.5 / 2 / 2.5 rem (ratio ≈ 1.25); weights 400 / 600 / 700; line height 1.5 body, 1.2 headings                           |
+| Spacing | 4 px base: `--space-1` 0.25rem … `--space-8` 4rem (4, 8, 12, 16, 24, 32, 48, 64 px)                                                                                                                                              |
+| Radius  | `--radius-sm` 4px, `--radius-md` 8px, `--radius-lg` 12px, `--radius-pill` 999px                                                                                                                                                  |
+| Shadow  | `--shadow-1/2/3` for raised, card, and dialog. Dark mode uses lower-opacity shadows plus a `--color-border-subtle` outline                                                                                                       |
+| Motion  | `--duration-fast` 120ms, `--duration-base` 200ms, `--duration-flip` 400ms, `--ease-standard` `cubic-bezier(.2,0,0,1)`; under `prefers-reduced-motion: reduce` all durations become 0ms and the card flip becomes an instant swap |
+| Focus   | `--focus-ring: 3px solid var(--color-accent-text)` with 2px offset, on `:focus-visible`                                                                                                                                          |
+| Touch   | `--target-min: 44px`                                                                                                                                                                                                             |
 
 Theme follows `prefers-color-scheme`.
 
@@ -523,12 +523,12 @@ Theme follows `prefers-color-scheme`.
 
 The deck is a `<div role="group" aria-labelledby="deck-label">` of native `<button aria-pressed>` elements with a **roving tabindex**: only one card is in the Tab order at a time, and arrow keys move between cards.
 
-| Key | Effect |
-|---|---|
+| Key             | Effect                                                                       |
+| --------------- | ---------------------------------------------------------------------------- |
 | Tab / Shift+Tab | Enter or leave the deck; focus lands on the selected card, or the first card |
-| ← → ↑ ↓ | Move focus to previous or next card, wrapping |
-| Home / End | First / last card |
-| Enter / Space | Cast this card; on the already-selected card, clear the vote |
+| ← → ↑ ↓         | Move focus to previous or next card, wrapping                                |
+| Home / End      | First / last card                                                            |
+| Enter / Space   | Cast this card; on the already-selected card, clear the vote                 |
 
 Native radio buttons were rejected because arrow keys on radios change the selection, which would cast a vote on every arrow press.
 
@@ -536,12 +536,12 @@ Screen readers announce each card as, for example, "5 points, toggle button, pre
 
 ### 11.5 Announcements
 
-| Event | Region | Text |
-|---|---|---|
-| Vote progress | `role="status"` (polite), debounced 1 s | "3 of 5 voters have voted" |
-| Own vote | same | "You voted 5" / "Vote cleared" |
-| Reveal | same | "Votes revealed. Average 5.3, median 5, range 3 to 8." |
-| Facilitator change | same | "Alex is now the facilitator" |
-| Connection lost / restored | `role="alert"` | "Connection lost. Reconnecting…" / "Reconnected" |
+| Event                      | Region                                  | Text                                                   |
+| -------------------------- | --------------------------------------- | ------------------------------------------------------ |
+| Vote progress              | `role="status"` (polite), debounced 1 s | "3 of 5 voters have voted"                             |
+| Own vote                   | same                                    | "You voted 5" / "Vote cleared"                         |
+| Reveal                     | same                                    | "Votes revealed. Average 5.3, median 5, range 3 to 8." |
+| Facilitator change         | same                                    | "Alex is now the facilitator"                          |
+| Connection lost / restored | `role="alert"`                          | "Connection lost. Reconnecting…" / "Reconnected"       |
 
 The who-has-voted list shows a check icon (`aria-hidden`) **and** the text "Voted" or "Waiting", so status never relies on color. Headings run in order: h1 room name, h2 current story, h2 participants.

@@ -1,4 +1,3 @@
-
 # Planning Poker — Project Guide for Claude Code
 
 A real-time planning poker website for scrum teams in RIT classes. A facilitator creates a room, teammates join with a code, everyone votes face-down on each story, the facilitator reveals, and the team agrees on an estimate.
@@ -127,7 +126,7 @@ Store rejoin tokens hashed, not in plain text. Schema changes go through a new m
 ## Code style
 
 - JavaScript ES modules, `async/await` (no raw promise chains or callbacks).
-- Small, single-purpose functions and components. Prefer clear names over comments; comment the *why*, not the *what*.
+- Small, single-purpose functions and components. Prefer clear names over comments; comment the _why_, not the _what_.
 - Handle errors explicitly. Server errors return a generic message to the client and log details on the server.
 - No dead code, commented-out code, or leftover `console.log` in commits.
 

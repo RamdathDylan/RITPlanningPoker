@@ -13,16 +13,18 @@ Write a small set of composable validator helpers in `shared/validate.js`, used 
 ## Options considered
 
 ### Option A: Hand-written helpers (chosen)
-| Dimension | Assessment |
-|---|---|
-| Complexity | Low to medium, roughly 150 lines |
-| Cost | No dependency |
-| Familiarity | Plain functions |
+
+| Dimension   | Assessment                       |
+| ----------- | -------------------------------- |
+| Complexity  | Low to medium, roughly 150 lines |
+| Cost        | No dependency                    |
+| Familiarity | Plain functions                  |
 
 **Pros:** every rule is visible and testable; no supply-chain risk; exactly the error codes we want.
 **Cons:** we own the edge cases. Mitigated by the 90% coverage target on middleware and validators.
 
 ### Option B: zod 4 (4.6.7, actively maintained)
+
 **Pros:** declarative schemas, `.strict()` rejects unknown keys, widely used.
 **Cons:** a new dependency and API to learn; error output must still be mapped to our codes.
 

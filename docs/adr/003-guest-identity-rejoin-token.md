@@ -10,25 +10,28 @@ No accounts and no university login: people join with a display name. The server
 
 On create or join, the server generates a 256-bit random token with `crypto.randomBytes(32)` and returns it once. The client stores it in localStorage and sends it in the Socket.IO handshake `auth` field, and as a Bearer header for CSV export. Postgres stores only `sha256(token)`.
 
-A fast hash such as SHA-256 is fine here. Password hashes like bcrypt are deliberately slow to protect *guessable* passwords, but a 256-bit random token cannot be guessed. Hashing exists so that a leaked database dump cannot be replayed as tokens.
+A fast hash such as SHA-256 is fine here. Password hashes like bcrypt are deliberately slow to protect _guessable_ passwords, but a 256-bit random token cannot be guessed. Hashing exists so that a leaked database dump cannot be replayed as tokens.
 
 ## Options considered
 
 ### Option A: Token in localStorage (chosen; already required by CLAUDE.md)
-| Dimension | Assessment |
-|---|---|
-| Complexity | Low |
-| Security | Readable by JavaScript, so an XSS bug could steal it |
-| Familiarity | Simple to explain and debug |
+
+| Dimension   | Assessment                                           |
+| ----------- | ---------------------------------------------------- |
+| Complexity  | Low                                                  |
+| Security    | Readable by JavaScript, so an XSS bug could steal it |
+| Familiarity | Simple to explain and debug                          |
 
 **Pros:** no cookies, so no CSRF and no cross-site WebSocket hijacking; works per room; survives refresh.
 **Cons:** XSS exposure; lost in private browsing or when storage is cleared.
 
 ### Option B: httpOnly session cookie
+
 **Pros:** JavaScript can't read it, so XSS can't steal it.
 **Cons:** needs CSRF protection and Origin checks on the socket handshake; one cookie covering several rooms is more complex.
 
 ### Option C: Accounts or university single sign-on
+
 **Pros:** strong identity.
 **Cons:** out of scope. The project has no university affiliation, and it would collect more personal data.
 

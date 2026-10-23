@@ -13,14 +13,17 @@ RoomService keeps one queue per room. Events for a room run strictly one after a
 ## Options considered
 
 ### Option A: Per-room serial queue (chosen)
+
 **Pros:** ordering is obvious and testable; memory changes only after a successful write.
 **Cons:** each event in a room waits for the previous one's write, a few milliseconds.
 
 ### Option B: Broadcast optimistically, persist afterwards
+
 **Pros:** lowest latency.
 **Cons:** a failed write leaves clients with state the database doesn't have; order of writes can differ from order of broadcasts.
 
 ### Option C: Database row locks
+
 **Pros:** correct even with several servers.
 **Cons:** harder to reason about and test; more queries per event.
 

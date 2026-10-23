@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Environment files: secrets never leave your machine. Only the example is committed.
+.env
+.env.*
+!.env.example
+
+# Build and test output
+dist/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# OS and editor files
+.DS_Store
+*.log

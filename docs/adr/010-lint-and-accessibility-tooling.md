@@ -15,10 +15,12 @@ We want automated accessibility checks. The usual lint plugin, `eslint-plugin-js
 ## Options considered
 
 ### Option A: ESLint 10 + axe (chosen)
+
 **Pros:** a supported linter; axe checks the real rendered page, including contrast.
 **Cons:** some issues are caught at test time rather than while typing.
 
 ### Option B: Stay on ESLint 9 with jsx-a11y
+
 **Pros:** accessibility hints in the editor.
 **Cons:** an unmaintained linter on a public, deployed project.
 
