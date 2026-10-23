@@ -56,3 +56,26 @@ export function buildRoom({ voters = 2, observers = 0, ...overrides } = {}) {
 export function fullRoom() {
   return buildRoom({ voters: LIMITS.participantsPerRoom - 1 });
 }
+
+export function buildStory(id, overrides = {}) {
+  return {
+    id,
+    title: `Story ${id}`,
+    position: 0,
+    status: "pending",
+    finalEstimate: null,
+    roundCount: 0,
+    ...overrides,
+  };
+}
+
+// A room voting on story "s1" in round "r1" with the given votes ({ participantId: card }).
+export function buildVotingRoom({ votes = {}, ...roomOptions } = {}) {
+  return buildRoom({
+    status: "voting",
+    stories: [buildStory("s1", { roundCount: 1 })],
+    currentStoryId: "s1",
+    round: { id: "r1", storyId: "s1", number: 1, votes, revealedAt: null },
+    ...roomOptions,
+  });
+}
