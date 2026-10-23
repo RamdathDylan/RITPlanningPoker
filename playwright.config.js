@@ -9,9 +9,10 @@ try {
   }
 }
 
-const clientPort = 4173;
-const serverPort = 3100;
-const clientOrigin = `http://localhost:${clientPort}`;
+// One server, as in production: Express serves the built client (with its real security
+// headers, including the Content-Security-Policy) plus the API and Socket.IO.
+const port = 3100;
+const origin = `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: "e2e",
@@ -20,7 +21,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
-    baseURL: clientOrigin,
+    baseURL: origin,
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
   },
@@ -31,31 +32,21 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } },
     },
   ],
-  webServer: [
-    {
-      // The real API + Socket.IO server, using the test database as the app role.
-      command: "npm run start -w server",
-      url: `http://localhost:${serverPort}/health`,
-      reuseExistingServer: !process.env.CI,
-      env: {
-        NODE_ENV: "test",
-        PORT: String(serverPort),
-        CLIENT_ORIGIN: clientOrigin,
-        DATABASE_URL: process.env.TEST_DATABASE_URL ?? "",
-        // E2E runs create many rooms from one machine.
-        RATE_LIMIT_ROOM_CREATES_PER_10_MIN: "1000",
-        RATE_LIMIT_JOINS_PER_MIN: "1000",
-        // Two seconds instead of a minute, so the handoff test doesn't wait a minute.
-        HANDOFF_MS: "2000",
-      },
+  webServer: {
+    command: "npm run build -w client && npm run start -w server",
+    url: `${origin}/health`,
+    reuseExistingServer: !process.env.CI,
+    env: {
+      NODE_ENV: "test",
+      PORT: String(port),
+      CLIENT_ORIGIN: origin,
+      CLIENT_DIST_DIR: "../client/dist",
+      DATABASE_URL: process.env.TEST_DATABASE_URL ?? "",
+      // E2E runs create many rooms from one machine.
+      RATE_LIMIT_ROOM_CREATES_PER_10_MIN: "1000",
+      RATE_LIMIT_JOINS_PER_MIN: "1000",
+      // Two seconds instead of a minute, so the handoff test doesn't wait a minute.
+      HANDOFF_MS: "2000",
     },
-    {
-      // Until the server serves the built client (roadmap 11.1), Vite's preview server hosts it
-      // and proxies /api, /health, and /socket.io to the server above (client/vite.config.js).
-      command: `npm run build -w client && npm run preview -w client -- --port ${clientPort} --strictPort`,
-      url: clientOrigin,
-      reuseExistingServer: !process.env.CI,
-      env: { PORT: String(serverPort) },
-    },
-  ],
+  },
 });

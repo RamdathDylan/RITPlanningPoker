@@ -1,3 +1,4 @@
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "./config.js";
 
@@ -27,6 +28,7 @@ describe("loadConfig", () => {
       rateLimits: { roomCreatesPer10Minutes: 5, joinsPerMinute: 60, exportsPerMinute: 10 },
       maxLiveRooms: 200,
       handoffMs: 60_000,
+      clientDist: null,
     });
   });
 
@@ -135,5 +137,10 @@ describe("loadConfig", () => {
 
   it.each(["0", "-1", "1.5", "many"])("rejects MAX_LIVE_ROOMS=%j", (value) => {
     expect(configErrorMessage({ ...validEnv, MAX_LIVE_ROOMS: value })).toContain("MAX_LIVE_ROOMS");
+  });
+
+  it("resolves a relative CLIENT_DIST_DIR to an absolute path", () => {
+    const config = loadConfig({ ...validEnv, CLIENT_DIST_DIR: "../client/dist" });
+    expect(config.clientDist).toBe(path.resolve("../client/dist"));
   });
 });

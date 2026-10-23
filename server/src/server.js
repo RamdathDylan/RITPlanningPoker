@@ -18,7 +18,9 @@ const PING_TIMEOUT_MS = 10_000;
 
 export function createServer({ config, logger, pool, roomService }) {
   const apiRouters = [createRoomsRouter({ pool, roomService, config })];
-  const httpServer = http.createServer(createApp({ config, logger, apiRouters }));
+  const httpServer = http.createServer(
+    createApp({ config, logger, apiRouters, clientDist: config.clientDist }),
+  );
   const io = new Server(httpServer, {
     maxHttpBufferSize: MAX_SOCKET_PACKET_BYTES,
     pingInterval: PING_INTERVAL_MS,
