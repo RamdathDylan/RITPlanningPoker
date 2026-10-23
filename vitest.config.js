@@ -54,6 +54,7 @@ export default defineConfig({
           name: "server",
           include: ["server/**/*.test.js"],
           environment: "node",
+          globalSetup: ["server/test/global-setup.js"],
           // Database tests share one Postgres; running files one at a time keeps them predictable.
           fileParallelism: false,
         },
