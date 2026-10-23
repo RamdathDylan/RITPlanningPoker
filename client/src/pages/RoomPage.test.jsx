@@ -21,6 +21,13 @@ describe("RoomPage states", () => {
     expect(screen.getByText("ABCD-EFGH")).toBeTruthy();
   });
 
+  it("lists the participants once joined", async () => {
+    const page = renderRoomPage();
+    await page.joinWith();
+
+    expect(screen.getByRole("heading", { level: 2, name: "Participants (2)" })).toBeTruthy();
+  });
+
   it("warns and disables actions while reconnecting", async () => {
     const page = renderRoomPage();
     await page.joinWith();
