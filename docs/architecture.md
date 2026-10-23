@@ -505,7 +505,7 @@ All ratios below were computed with the WCAG 2.1 relative-luminance formula. Req
 | `--color-border-strong` (inputs, cards)                       | `#6B7280` | 4.8                       | `#8A919E` | 6.0                      |
 | `--color-border-subtle` (decorative dividers only)            | `#E5E7EB` | n/a                       | `#2A2F38` | n/a                      |
 
-The bright orange alone is never a meaningful boundary on light surfaces, where it is only 2.8:1. Selected cards use the `--color-accent-text` border plus a check mark and the word "Selected".
+The bright orange alone is never a meaningful boundary on light surfaces, where it is only 2.8:1. Selected cards use a thicker `--color-accent-text` border, the selected background, and a ✓ mark (screen readers hear "pressed" via `aria-pressed`). The word "Selected" was dropped because it overflowed the card at phone widths.
 
 | Group   | Tokens                                                                                                                                                                                                                           |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

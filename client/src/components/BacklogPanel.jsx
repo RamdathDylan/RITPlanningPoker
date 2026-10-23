@@ -68,6 +68,10 @@ export default function BacklogPanel({ room, disabled, onAction }) {
           onClick={() => setExpanded((current) => !current)}
         >
           Stories ({stories.length})
+          {/* Decorative: kept out of the accessible name ("Stories (3)"). */}
+          <span className={styles.chevron} aria-hidden="true">
+            {expanded ? "▾" : "▸"}
+          </span>
         </button>
       </h2>
       <div id={contentId} hidden={!expanded}>
@@ -84,7 +88,7 @@ export default function BacklogPanel({ room, disabled, onAction }) {
                     className={buttons.secondary}
                     type="button"
                     disabled={disabled}
-                    aria-label={`Start voting on ${story.title}`}
+                    aria-label={`Vote on ${story.title}`}
                     onClick={() => onAction("story:select", { storyId: story.id })}
                   >
                     Vote

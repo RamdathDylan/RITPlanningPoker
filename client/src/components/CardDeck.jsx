@@ -65,9 +65,10 @@ export default function CardDeck({ cards, selected, onSelect, disabled = false }
               onClick={() => onSelect(isSelected ? null : value)}
             >
               <span className={styles.face}>{value}</span>
+              {/* A visible non-color cue; screen readers hear "pressed" via aria-pressed. */}
               {isSelected && (
-                <span className={styles.selectedLabel}>
-                  <CheckIcon /> Selected
+                <span className={styles.selectedMark}>
+                  <CheckIcon />
                 </span>
               )}
             </button>

@@ -18,12 +18,8 @@
   cursor: pointer;
 }
 
-.toggle::after {
-  content: " ▾";
-}
-
-.toggle[aria-expanded="false"]::after {
-  content: " ▸";
+.chevron {
+  margin-left: var(--space-1);
 }
 
 .empty {
