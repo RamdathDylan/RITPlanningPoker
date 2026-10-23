@@ -1,0 +1,20 @@
+.round {
+  margin-bottom: var(--space-5);
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-xl);
+  overflow-wrap: anywhere;
+}
+
+.waiting {
+  margin: 0 0 var(--space-5);
+  color: var(--color-text-muted);
+}

@@ -39,3 +39,11 @@
   color: var(--color-warning);
   font-weight: var(--font-weight-semibold);
 }
+
+.actionError {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+}
