@@ -86,5 +86,21 @@ export default defineConfig([
       "no-console": "error",
     },
   },
+  {
+    // CLAUDE.md security rule 2: SQL is parameterized ($1, $2, ...), never built from strings.
+    files: ["server/src/**/*.js"],
+    ignores: ["**/*.test.js"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...bannedHtmlSyntax,
+        {
+          selector:
+            "CallExpression[callee.property.name='query'] > TemplateLiteral[expressions.length>0]",
+          message: "Use $1, $2 parameters instead of building SQL with ${} (CLAUDE.md rule 2).",
+        },
+      ],
+    },
+  },
   prettier,
 ]);
