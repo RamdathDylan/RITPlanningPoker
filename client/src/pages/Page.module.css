@@ -17,3 +17,16 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-lg);
 }
+
+.section {
+  margin-bottom: var(--space-6);
+}
+
+.sectionTitle {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-lg);
+}
+
+.form {
+  max-width: 28rem;
+}

@@ -1,0 +1,33 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--target-min);
+  min-width: var(--target-min);
+  padding: var(--space-2) var(--space-5);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.primary {
+  composes: button;
+  background: var(--color-accent-fill);
+  color: var(--color-on-accent);
+}
+
+.secondary {
+  composes: button;
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
