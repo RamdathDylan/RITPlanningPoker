@@ -121,6 +121,7 @@ describe("backlog panel", () => {
     expect(toggle.getAttribute("aria-expanded")).toBe("true");
     await page.user.click(toggle);
     expect(toggle.getAttribute("aria-expanded")).toBe("false");
-    expect(screen.queryByText("Signup")).toBeNull();
+    // Role queries skip hidden content (text queries don't), matching what users perceive.
+    expect(within(backlog()).queryAllByRole("listitem")).toHaveLength(0);
   });
 });

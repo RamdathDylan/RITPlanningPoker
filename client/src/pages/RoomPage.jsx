@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router";
 import { formatJoinCode, parseJoinCode } from "../../../shared/join-code.js";
 import Announcer from "../components/Announcer.jsx";
+import BacklogPanel from "../components/BacklogPanel.jsx";
 import { cardName } from "../components/CardDeck.jsx";
 import CurrentRound from "../components/CurrentRound.jsx";
 import FacilitatorBar from "../components/FacilitatorBar.jsx";
@@ -128,23 +129,30 @@ export default function RoomPage() {
           {actionError}
         </p>
       )}
-      {room.room.status !== "ended" && (
-        <CurrentRound room={room} disabled={reconnecting} onVote={handleVote} />
-      )}
-      {room.me.isFacilitator && room.room.status !== "ended" && (
-        <FacilitatorBar room={room} disabled={reconnecting} onAction={runAction} />
-      )}
-      <ParticipantList
-        participants={room.participants}
-        facilitatorId={room.room.facilitatorId}
-        meId={room.me.participantId}
-        roundOpen={room.round !== null}
-      />
-      {room.room.status === "ended" && (
-        <section aria-labelledby="ended-heading">
-          <h2 id="ended-heading">This session has ended</h2>
-        </section>
-      )}
+      <div className={styles.layout}>
+        <div className={styles.primary}>
+          {room.room.status !== "ended" && (
+            <CurrentRound room={room} disabled={reconnecting} onVote={handleVote} />
+          )}
+          {room.me.isFacilitator && room.room.status !== "ended" && (
+            <FacilitatorBar room={room} disabled={reconnecting} onAction={runAction} />
+          )}
+          {room.room.status === "ended" && (
+            <section aria-labelledby="ended-heading">
+              <h2 id="ended-heading">This session has ended</h2>
+            </section>
+          )}
+        </div>
+        <div className={styles.secondary}>
+          <ParticipantList
+            participants={room.participants}
+            facilitatorId={room.room.facilitatorId}
+            meId={room.me.participantId}
+            roundOpen={room.round !== null}
+          />
+          <BacklogPanel room={room} disabled={reconnecting} onAction={runAction} />
+        </div>
+      </div>
       <Announcer message={announcement} />
     </main>
   );

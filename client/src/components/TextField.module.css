@@ -25,6 +25,11 @@
   font: inherit;
 }
 
+.multiline {
+  min-height: var(--card-height);
+  resize: vertical;
+}
+
 .input[aria-invalid="true"] {
   border-color: var(--color-danger);
 }

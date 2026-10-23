@@ -47,3 +47,15 @@
   border-radius: var(--radius-md);
   color: var(--color-danger);
 }
+
+.layout {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
