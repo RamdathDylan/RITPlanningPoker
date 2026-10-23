@@ -13,6 +13,9 @@ function failingRouter() {
   router.get("/explode-async", async () => {
     throw new Error("secret async detail");
   });
+  router.get("/teapot", () => {
+    throw Object.assign(new Error("secret client-error detail"), { status: 418 });
+  });
   return router;
 }
 
@@ -48,6 +51,13 @@ describe("createApp", () => {
       expect(response.text).not.toMatch(/secret|stack|at /);
     },
   );
+
+  it("keeps an unlisted 4xx status but replaces its message with a generic one", async () => {
+    const response = await request(buildApp().app).get("/api/teapot");
+
+    expect(response.status).toBe(418);
+    expect(response.body).toEqual({ error: "Bad request" });
+  });
 
   it("logs the error details on the server", async () => {
     const { app, logger } = buildApp();
