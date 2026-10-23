@@ -10,6 +10,7 @@ import LeaveRoom from "../components/LeaveRoom.jsx";
 import ParticipantList from "../components/ParticipantList.jsx";
 import RoomMessage from "../components/RoomMessage.jsx";
 import SessionSummary from "../components/SessionSummary.jsx";
+import { useServices } from "../services.jsx";
 import { useRoom } from "../socket/useRoom.js";
 import styles from "./RoomPage.module.css";
 
@@ -84,6 +85,7 @@ function useRevealAnnouncement(room, announce) {
 export default function RoomPage() {
   const params = useParams();
   const code = parseJoinCode(params.code);
+  const { api, sessions, saveFile } = useServices();
   const { status, room, error, removedReason, send, leave } = useRoom(code ?? "");
   const [announcement, setAnnouncement] = useState("");
   const [actionError, setActionError] = useState(null);
@@ -123,6 +125,16 @@ export default function RoomPage() {
     const ack = await send(event, payload);
     setActionError(ack.ok ? null : ack.error.message);
     return ack.ok;
+  }
+
+  async function handleExport() {
+    try {
+      const file = await api.exportCsv(code, sessions.load(code)?.token);
+      saveFile(file, `planning-poker-${code}.csv`);
+      setActionError(null);
+    } catch (exportError) {
+      setActionError(exportError.message);
+    }
   }
 
   async function handleLeave() {
@@ -171,7 +183,12 @@ export default function RoomPage() {
           {room.me.isFacilitator && room.room.status !== "ended" && (
             <FacilitatorBar room={room} disabled={reconnecting} onAction={runAction} />
           )}
-          {room.room.status === "ended" && <SessionSummary stories={room.stories} />}
+          {room.room.status === "ended" && (
+            <SessionSummary
+              stories={room.stories}
+              onExport={room.me.isFacilitator ? handleExport : undefined}
+            />
+          )}
         </div>
         <div className={styles.secondary}>
           <ParticipantList

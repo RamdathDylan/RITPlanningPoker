@@ -59,5 +59,21 @@ export function createApi({ fetch = (...args) => globalThis.fetch(...args) } = {
       }
       return post(`/api/rooms/${canonical}/participants`, body);
     },
+    // The token goes in the Authorization header, never in the URL (T-05).
+    async exportCsv(code, token) {
+      const canonical = parseJoinCode(code);
+      let response;
+      try {
+        response = await fetch(`/api/rooms/${canonical}/export.csv`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch {
+        throw new ApiError("NETWORK", NETWORK_MESSAGE);
+      }
+      if (!response.ok) {
+        throw errorFromResponse(response.status, await readJson(response));
+      }
+      return response.blob();
+    },
   };
 }
