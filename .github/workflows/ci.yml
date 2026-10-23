@@ -27,6 +27,14 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    env:
+      # Throwaway credentials for the CI-only database container. Not secrets.
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ci-only-superuser
+      PP_MIGRATOR_PASSWORD: ci-only-migrator
+      PP_APP_PASSWORD: ci-only-app
+      TEST_MIGRATION_DATABASE_URL: postgres://pp_migrator:ci-only-migrator@localhost:5432/planning_poker_test
+      TEST_DATABASE_URL: postgres://pp_app:ci-only-app@localhost:5432/planning_poker_test
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -34,6 +42,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: docker compose up -d --wait
       - run: npm test
 
   audit:
