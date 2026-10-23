@@ -29,3 +29,27 @@ test.describe("create room page", () => {
     await expect(page).toHaveURL("/new");
   });
 });
+
+test.describe("join room page", () => {
+  for (const colorScheme of ["light", "dark"]) {
+    test(`has no accessibility violations, empty and with errors (${colorScheme})`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.goto("/join/ABCDEFGH");
+      await expect(page.getByLabel("Room code")).toHaveValue("ABCD-EFGH");
+      await expectNoA11yViolations(page);
+
+      await page.getByRole("button", { name: "Join room" }).click();
+      await expect(page.getByText("Use 1 to 40 characters.")).toBeVisible();
+      await expectNoA11yViolations(page);
+    });
+  }
+
+  test("opens with the code typed on the landing page", async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("Room code").fill("abcd-efgh");
+    await page.getByRole("button", { name: "Join room" }).click();
+    await expect(page).toHaveURL("/join/ABCDEFGH");
+  });
+});
