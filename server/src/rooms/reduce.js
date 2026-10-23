@@ -7,6 +7,7 @@ import {
   roleChanged,
 } from "./participants.js";
 import { reject } from "./results.js";
+import { storiesAdded } from "./stories.js";
 
 const handlers = {
   participantJoined,
@@ -15,6 +16,7 @@ const handlers = {
   participantDisconnected,
   roleChanged,
   participantRemoved,
+  storiesAdded,
 };
 
 // The room state machine: reduce(state, action, now) -> { ok, state, effects } | { ok, code }.
