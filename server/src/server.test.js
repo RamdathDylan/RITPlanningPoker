@@ -15,6 +15,14 @@ describe("socket server", () => {
     await server.close();
   });
 
+  it("tells clients to expect a 10 s heartbeat with a 10 s timeout", async () => {
+    const socket = server.connectClient({ auth: { token: "small" } });
+    const handshake = await new Promise((resolve) =>
+      socket.io.engine.once("handshake", (data) => resolve(data)),
+    );
+    expect(handshake).toMatchObject({ pingInterval: 10_000, pingTimeout: 10_000 });
+  });
+
   it("serves HTTP routes and sockets from the same port", async () => {
     const response = await request(server.url).get("/health");
 

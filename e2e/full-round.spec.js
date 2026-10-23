@@ -1,50 +1,18 @@
 // CLAUDE.md required E2E: four voters (plus the facilitator) complete a full round.
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./helpers/a11y.js";
+import { card, createRoom, joinRoom, openStories } from "./helpers/room.js";
 
 // Distinct cards so a leak in the browser's socket traffic is unmistakable.
 const VOTES = { Facilitator: "13", "Voter 1": "1", "Voter 2": "2", "Voter 3": "3", "Voter 4": "8" };
 
-const cardName = (value) => `${value} ${value === "1" ? "point" : "points"}`;
-
-// Cards are matched exactly: by default Playwright would also match "1 point" inside "21 points".
-const card = (page, value) => page.getByRole("button", { name: cardName(value), exact: true });
-
-// On phones the stories panel starts collapsed (it keeps the voting screen focused).
-async function openStories(page) {
-  const toggle = page.getByRole("button", { name: /^Stories \(\d+\)$/ });
-  if ((await toggle.getAttribute("aria-expanded")) === "false") {
-    await toggle.click();
-  }
-}
-
-async function newPage(browser) {
-  const context = await browser.newContext();
-  return context.newPage();
-}
-
 test("four voters and a facilitator complete a round", async ({ browser }, testInfo) => {
   test.setTimeout(60_000);
 
-  // Facilitator creates the room.
-  const host = await newPage(browser);
-  await host.goto("/");
-  await host.getByRole("link", { name: "Create a room" }).click();
-  await host.getByLabel("Room name").fill("E2E Sprint");
-  await host.getByLabel("Your name").fill("Facilitator");
-  await host.getByRole("button", { name: "Create room" }).click();
-  await expect(host.getByRole("heading", { level: 1, name: "E2E Sprint" })).toBeVisible();
-  const code = /room\/([A-Z0-9]{8})$/.exec(host.url())[1];
-
-  // Four voters join with the code, each in their own browser context (separate storage).
+  const { host, code } = await createRoom(browser);
   const voters = {};
   for (const name of ["Voter 1", "Voter 2", "Voter 3", "Voter 4"]) {
-    const page = await newPage(browser);
-    await page.goto(`/join/${code}`);
-    await page.getByLabel("Your name").fill(name);
-    await page.getByRole("button", { name: "Join room" }).click();
-    await expect(page.getByRole("heading", { level: 2, name: /Participants/ })).toBeVisible();
-    voters[name] = page;
+    voters[name] = await joinRoom(browser, code, name);
   }
   await expect(host.getByRole("heading", { level: 2, name: "Participants (5)" })).toBeVisible();
 
