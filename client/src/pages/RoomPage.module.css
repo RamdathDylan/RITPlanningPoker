@@ -1,0 +1,41 @@
+.room {
+  flex: 1;
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.name {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  overflow-wrap: anywhere;
+}
+
+.code {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.code strong {
+  color: var(--color-text);
+  letter-spacing: 0.05em;
+}
+
+.banner {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-warning);
+  border-radius: var(--radius-md);
+  color: var(--color-warning);
+  font-weight: var(--font-weight-semibold);
+}
