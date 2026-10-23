@@ -97,7 +97,7 @@ describe("backlog panel", () => {
     const page = renderRoomPage();
     await page.joinWith(facilitatorView());
 
-    await page.user.click(screen.getByRole("button", { name: "Start voting on Reset password" }));
+    await page.user.click(screen.getByRole("button", { name: "Vote on Reset password" }));
 
     expect(page.socket.emitted.at(-1)).toEqual({
       event: "story:select",
@@ -110,7 +110,7 @@ describe("backlog panel", () => {
     await page.joinWith(snapshot({ stories }));
 
     expect(screen.queryByLabelText("Add stories")).toBeNull();
-    expect(screen.queryByRole("button", { name: /Start voting on/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Vote on / })).toBeNull();
   });
 
   it("can be collapsed and expanded", async () => {

@@ -55,10 +55,8 @@
   background: var(--color-selected-bg);
 }
 
-.selectedLabel {
+.selectedMark {
   display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent-text);
+  font-size: var(--font-size-md);
 }

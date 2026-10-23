@@ -7,6 +7,17 @@ const VOTES = { Facilitator: "13", "Voter 1": "1", "Voter 2": "2", "Voter 3": "3
 
 const cardName = (value) => `${value} ${value === "1" ? "point" : "points"}`;
 
+// Cards are matched exactly: by default Playwright would also match "1 point" inside "21 points".
+const card = (page, value) => page.getByRole("button", { name: cardName(value), exact: true });
+
+// On phones the stories panel starts collapsed (it keeps the voting screen focused).
+async function openStories(page) {
+  const toggle = page.getByRole("button", { name: /^Stories \(\d+\)$/ });
+  if ((await toggle.getAttribute("aria-expanded")) === "false") {
+    await toggle.click();
+  }
+}
+
 async function newPage(browser) {
   const context = await browser.newContext();
   return context.newPage();
@@ -44,9 +55,10 @@ test("four voters and a facilitator complete a round", async ({ browser }, testI
   );
 
   // Facilitator adds stories and starts voting on the first.
+  await openStories(host);
   await host.getByLabel("Add stories").fill("Login page\nSignup page");
   await host.getByRole("button", { name: "Add stories" }).click();
-  await host.getByRole("button", { name: "Start voting on Login page" }).click();
+  await host.getByRole("button", { name: "Vote on Login page" }).click();
   for (const page of [host, ...Object.values(voters)]) {
     await expect(page.getByRole("heading", { level: 2, name: "Login page" })).toBeVisible();
   }
@@ -55,13 +67,10 @@ test("four voters and a facilitator complete a round", async ({ browser }, testI
   // Everyone votes.
   const everyone = { Facilitator: host, ...voters };
   for (const [name, page] of Object.entries(everyone)) {
-    await page.getByRole("button", { name: cardName(VOTES[name]) }).click();
-    await expect(page.getByRole("button", { name: cardName(VOTES[name]) })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    await card(page, VOTES[name]).click();
+    await expect(card(page, VOTES[name])).toHaveAttribute("aria-pressed", "true");
   }
-  await expect(host.getByText("Voted")).toHaveCount(5);
+  await expect(host.getByText("Voted", { exact: true })).toHaveCount(5);
   await testInfo.attach("voting", {
     body: await host.screenshot({ fullPage: true }),
     contentType: "image/png",
@@ -93,6 +102,7 @@ test("four voters and a facilitator complete a round", async ({ browser }, testI
   await expect(host.getByLabel("Final estimate")).toHaveValue("3");
   await host.getByRole("button", { name: "Accept estimate" }).click();
   for (const page of Object.values(everyone)) {
+    await openStories(page);
     await expect(page.getByText("Estimated: 3")).toBeVisible();
   }
 });

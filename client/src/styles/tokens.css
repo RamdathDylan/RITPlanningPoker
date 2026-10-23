@@ -75,6 +75,7 @@
   --layout-max-width: 64rem;
   --card-width: 3.5rem;
   --card-height: 5rem;
+  --revealed-card-width: 6rem;
 }
 
 @media (prefers-color-scheme: dark) {
