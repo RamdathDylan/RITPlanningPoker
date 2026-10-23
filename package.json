@@ -16,7 +16,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "check:env-files": "node tooling/env-files.js"
+    "check:env-files": "node tooling/env-files.js",
+    "migrate": "npm run migrate --workspace server"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

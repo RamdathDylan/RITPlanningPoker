@@ -2,5 +2,11 @@
   "name": "@planning-poker/server",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "pg": "8.23.1"
+  },
+  "scripts": {
+    "migrate": "node --env-file-if-exists=../.env src/db/migrate-cli.js"
+  }
 }
