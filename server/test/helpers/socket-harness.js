@@ -10,11 +10,17 @@ import { createFakeLogger } from "./fake-logger.js";
 
 // Starts the real HTTP + Socket.IO server on a random free port (port 0), with its own
 // database pool (as pp_app) and RoomService.
-export async function startTestServer({ configOverrides = {} } = {}) {
+// `persistChange` can be overridden to simulate a failing database write.
+export async function startTestServer({ configOverrides = {}, persistChange } = {}) {
   const config = testConfig(configOverrides);
   const logger = createFakeLogger();
   const pool = createAppPool();
-  const roomService = createRoomService({ pool, handoffMs: config.handoffMs, logger });
+  const roomService = createRoomService({
+    pool,
+    handoffMs: config.handoffMs,
+    logger,
+    ...(persistChange ? { persistChange } : {}),
+  });
   const server = createServer({ config, logger, pool, roomService });
   const port = await server.listen(0);
   const url = `http://localhost:${port}`;

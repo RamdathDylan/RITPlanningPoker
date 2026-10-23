@@ -25,6 +25,10 @@ const STORY_ACTIONS = new Set([
 export function createBroadcaster({ io, roomService }) {
   roomService.onChange((roomId, { action, state }) => {
     const view = toPublicView(state);
+    if (action.type === "roundRevealed") {
+      const { id, votes, stats } = view.round;
+      io.to(roomId).emit(SERVER_EVENTS.ROUND_REVEALED, { roundId: id, votes, stats });
+    }
     if (VOTE_ACTIONS.has(action.type)) {
       // Who has voted, never what (CLAUDE.md security rule 1).
       io.to(roomId).emit(SERVER_EVENTS.VOTE_STATUS, {
