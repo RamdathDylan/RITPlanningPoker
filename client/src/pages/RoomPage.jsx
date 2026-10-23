@@ -1,5 +1,6 @@
 import { Navigate, useParams } from "react-router";
 import { formatJoinCode, parseJoinCode } from "../../../shared/join-code.js";
+import ParticipantList from "../components/ParticipantList.jsx";
 import RoomMessage from "../components/RoomMessage.jsx";
 import { useRoom } from "../socket/useRoom.js";
 import styles from "./RoomPage.module.css";
@@ -74,6 +75,12 @@ export default function RoomPage() {
           Room code <strong>{formatJoinCode(room.room.code)}</strong>
         </p>
       </header>
+      <ParticipantList
+        participants={room.participants}
+        facilitatorId={room.room.facilitatorId}
+        meId={room.me.participantId}
+        roundOpen={room.round !== null}
+      />
       {room.room.status === "ended" && (
         <section aria-labelledby="ended-heading">
           <h2 id="ended-heading">This session has ended</h2>
