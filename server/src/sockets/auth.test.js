@@ -70,8 +70,11 @@ describe("socket handshake authentication", () => {
 
     expect(await connectionOutcome(server.connectClient({ auth }))).toBe("Too many connections");
 
+    // A client's own disconnect() fires "disconnect" immediately, so listen first.
+    const closed = waitFor(sockets[0], "disconnect");
     sockets[0].disconnect();
-    await waitFor(sockets[0], "disconnect");
+    await closed;
+    // Give the server a moment to notice the closed socket and release its slot.
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(await connectionOutcome(server.connectClient({ auth }))).toBe("connected");
   });
