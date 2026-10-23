@@ -35,7 +35,9 @@ describe("client event schemas", () => {
 
   it.each(eventsWithKeys)("%s rejects a payload with a missing key", (event) => {
     const [firstKey] = Object.keys(validPayloads[event]);
-    const { [firstKey]: _removed, ...missing } = validPayloads[event];
+    const missing = Object.fromEntries(
+      Object.entries(validPayloads[event]).filter(([key]) => key !== firstKey),
+    );
     expect(validateClientEvent(event, missing)).toMatchObject({ ok: false });
   });
 
