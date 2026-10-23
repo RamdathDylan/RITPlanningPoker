@@ -28,3 +28,27 @@ export function storiesAdded(state, { actorId, stories }) {
   }));
   return accept({ ...state, stories: [...state.stories, ...added] });
 }
+
+// Starts a new round on the chosen story. Any open round is abandoned (its votes are dropped).
+export function storySelected(state, { actorId, storyId, roundId }) {
+  if (!isFacilitator(state, actorId)) {
+    return reject("FORBIDDEN");
+  }
+  if (state.status === "ended") {
+    return reject("INVALID_STATE");
+  }
+  const story = state.stories.find((candidate) => candidate.id === storyId);
+  if (!story) {
+    return reject("NOT_FOUND");
+  }
+  const number = story.roundCount + 1;
+  return accept({
+    ...state,
+    status: "voting",
+    currentStoryId: storyId,
+    stories: state.stories.map((candidate) =>
+      candidate.id === storyId ? { ...candidate, roundCount: number } : candidate,
+    ),
+    round: { id: roundId, storyId, number, votes: {}, revealedAt: null },
+  });
+}
