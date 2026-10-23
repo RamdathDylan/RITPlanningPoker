@@ -11,7 +11,12 @@ const pool = createAppPool();
 const NOW = Date.UTC(2026, 9, 23, 12, 0, 0);
 
 function buildApp(routerOptions = {}) {
-  const router = createRoomsRouter({ pool, now: () => NOW, ...routerOptions });
+  const router = createRoomsRouter({
+    pool,
+    config: testConfig(),
+    now: () => NOW,
+    ...routerOptions,
+  });
   return createApp({ config: testConfig(), logger: createFakeLogger(), apiRouters: [router] });
 }
 
