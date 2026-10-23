@@ -1,11 +1,13 @@
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { resetDatabase } from "../test/helpers/db.js";
 import { startTestServer, waitFor } from "../test/helpers/socket-harness.js";
 
 describe("socket server", () => {
   let server;
 
   beforeEach(async () => {
+    await resetDatabase();
     server = await startTestServer();
   });
 
