@@ -1,3 +1,5 @@
+import { computeStats } from "./stats.js";
+
 // The only functions whose output may be sent to clients (CLAUDE.md security rules 1 and 15).
 // Each field is copied explicitly, so adding something to room state never leaks by accident.
 
@@ -17,7 +19,8 @@ function publicRound(state) {
   const votes = state.participants
     .filter((participant) => hasVoted(round, participant.id))
     .map((participant) => ({ participantId: participant.id, value: round.votes[participant.id] }));
-  return { id: round.id, number: round.number, revealed, votes };
+  const stats = computeStats(votes.map((vote) => vote.value));
+  return { id: round.id, number: round.number, revealed, votes, stats };
 }
 
 export function toPublicView(state) {
