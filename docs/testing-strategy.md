@@ -13,14 +13,14 @@ Every PR has a `test:` commit before its `feat:` commit.
 
 ## 1. Test levels
 
-| Level | Tool | Runs against | What it proves | Speed |
-|---|---|---|---|---|
-| Unit | Vitest (node) | Pure functions | Game rules, projections, stats, validators, CSV escaping, code generation | ms |
-| Component | Vitest + jsdom + Testing Library + user-event | React components | Rendering, keyboard behavior, ARIA, states | ms–s |
-| DB integration | Vitest + real Postgres | `db/` queries and migrations | Constraints, persist/hydrate round trip, retention | s |
-| HTTP | Vitest + Supertest + real Postgres | Express app from `createApp()` | Validation, rate limits, headers, auth, export | s |
-| Socket | Vitest + real Socket.IO server on port 0 + several `socket.io-client`s + real Postgres | Handlers + RoomService | Authorization, hidden votes, broadcasts, concurrency, reconnection | s |
-| E2E | Playwright + axe | Built app + Postgres | Full user journeys, accessibility, responsive layout | 10s of s |
+| Level          | Tool                                                                                   | Runs against                   | What it proves                                                            | Speed    |
+| -------------- | -------------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------- | -------- |
+| Unit           | Vitest (node)                                                                          | Pure functions                 | Game rules, projections, stats, validators, CSV escaping, code generation | ms       |
+| Component      | Vitest + jsdom + Testing Library + user-event                                          | React components               | Rendering, keyboard behavior, ARIA, states                                | ms–s     |
+| DB integration | Vitest + real Postgres                                                                 | `db/` queries and migrations   | Constraints, persist/hydrate round trip, retention                        | s        |
+| HTTP           | Vitest + Supertest + real Postgres                                                     | Express app from `createApp()` | Validation, rate limits, headers, auth, export                            | s        |
+| Socket         | Vitest + real Socket.IO server on port 0 + several `socket.io-client`s + real Postgres | Handlers + RoomService         | Authorization, hidden votes, broadcasts, concurrency, reconnection        | s        |
+| E2E            | Playwright + axe                                                                       | Built app + Postgres           | Full user journeys, accessibility, responsive layout                      | 10s of s |
 
 The pyramid shape: most tests are unit tests on `server/src/rooms` and `shared/`. Socket tests cover the security guarantees end to end. E2E is a handful of journeys.
 
@@ -28,20 +28,20 @@ The pyramid shape: most tests are unit tests on `server/src/rooms` and `shared/`
 
 These form `server/test/security/` and must never be skipped or weakened.
 
-| Test (behavior statement) | Level | Threat |
-|---|---|---|
-| No packet sent to any client before `round:revealed` contains a vote value | Socket (recorder) | T-01 |
-| A reconnecting voter's `room:state` contains their own vote and no one else's | Socket | T-02 |
-| Error acks and messages never contain vote values | Unit + socket | T-03 |
-| Each facilitator-only event from a voter or observer is rejected with `FORBIDDEN` and causes no broadcast | Socket (table-driven, 9 events × 2 roles) | T-18 |
-| Rejoining with a valid token restores the same participant id, seat, and vote, and creates no new participant row | Socket + DB | CLAUDE.md required |
-| Each event rejects missing keys, extra keys, wrong types, oversize strings, and `__proto__` keys | Unit (validators) + socket (sample) | T-24 |
-| Oversized HTTP bodies (413) and socket packets (rejected, server stays up) | HTTP + socket | T-15, T-22 |
-| Handshake without, with a wrong, or with another room's token is refused | Socket | T-17 |
-| Join codes: alphabet, length, crypto source; identical 404s | Unit + HTTP | T-06 |
-| XSS payload names render as literal text; CSP header present | Component + HTTP | T-10 |
-| CSV cells starting with `= + - @ TAB CR` are neutralized | Unit | T-12 |
-| `pp_app` cannot run DDL | DB integration | T-27 |
+| Test (behavior statement)                                                                                         | Level                                     | Threat             |
+| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------ |
+| No packet sent to any client before `round:revealed` contains a vote value                                        | Socket (recorder)                         | T-01               |
+| A reconnecting voter's `room:state` contains their own vote and no one else's                                     | Socket                                    | T-02               |
+| Error acks and messages never contain vote values                                                                 | Unit + socket                             | T-03               |
+| Each facilitator-only event from a voter or observer is rejected with `FORBIDDEN` and causes no broadcast         | Socket (table-driven, 9 events × 2 roles) | T-18               |
+| Rejoining with a valid token restores the same participant id, seat, and vote, and creates no new participant row | Socket + DB                               | CLAUDE.md required |
+| Each event rejects missing keys, extra keys, wrong types, oversize strings, and `__proto__` keys                  | Unit (validators) + socket (sample)       | T-24               |
+| Oversized HTTP bodies (413) and socket packets (rejected, server stays up)                                        | HTTP + socket                             | T-15, T-22         |
+| Handshake without, with a wrong, or with another room's token is refused                                          | Socket                                    | T-17               |
+| Join codes: alphabet, length, crypto source; identical 404s                                                       | Unit + HTTP                               | T-06               |
+| XSS payload names render as literal text; CSP header present                                                      | Component + HTTP                          | T-10               |
+| CSV cells starting with `= + - @ TAB CR` are neutralized                                                          | Unit                                      | T-12               |
+| `pp_app` cannot run DDL                                                                                           | DB integration                            | T-27               |
 
 ## 3. Room state machine: test-first from the transition table
 
@@ -85,20 +85,20 @@ Writing the table cases first forces every unclear rule to be decided before cod
 
 ## 6. Test infrastructure (built in roadmap phase 1, before any feature)
 
-| Piece | Location | Description |
-|---|---|---|
-| Vitest projects | `vitest.config.js` | `shared` (node), `server` (node, DB tests run serially with `fileParallelism: false`), `client` (jsdom) |
-| Test database | `docker-compose.yml` + `docker/initdb/01-test-db.sql` | Creates `planning_poker_test` beside the dev database, plus `pp_app` and `pp_migrator` roles |
-| Global setup | `server/test/global-setup.js` | Runs migrations once against the test database |
-| Per-test reset | `server/test/helpers/db.js` | `resetDb()` runs `TRUNCATE rooms CASCADE` in `beforeEach` |
-| Socket harness | `server/test/helpers/socket-harness.js` | `startTestServer(overrides)` → `{ url, close }`; `connectClient(url, token)` with `forceNew: true`, `reconnection: false` unless a test opts in; `waitFor(socket, event, { timeout })`; `emitWithAck` is built into Socket.IO 4.6+ |
-| Packet recorder | `server/test/helpers/recorder.js` | Wraps a client with `socket.onAny()` (a Socket.IO listener for every incoming event), storing `[event, payload]`. `findKeyDeep(packets, "value")` scans nested objects for leaks |
-| Builders | `server/test/builders.js` | `buildRoomState({ status, voters: 3, votes: { 0: "5" } })` for unit tests; `createRoomViaApi()` and `joinViaApi()` for integration tests |
-| Fake data | builders | Names like "Test Voter 1"; never real names |
-| Clock | test helper | `fakeClock()` wraps Vitest fake timers into the RoomService `clock` shape |
-| E2E | `e2e/playwright.config.js` | `webServer` starts the built app against the test database; `projects` for 375×812 and 1280×800; a `checkA11y(page)` helper wraps `@axe-core/playwright` |
-| Coverage | `vitest.config.js` | v8 provider; thresholds `server/src/rooms/**` 90, `server/src/middleware/**` 90, global 80 |
-| CI | `.github/workflows/ci.yml` | Jobs: lint → unit/integration (Postgres service container) → e2e (from phase 8) → `npm audit --audit-level=high` |
+| Piece           | Location                                              | Description                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vitest projects | `vitest.config.js`                                    | `shared` (node), `server` (node, DB tests run serially with `fileParallelism: false`), `client` (jsdom)                                                                                                                            |
+| Test database   | `docker-compose.yml` + `docker/initdb/01-test-db.sql` | Creates `planning_poker_test` beside the dev database, plus `pp_app` and `pp_migrator` roles                                                                                                                                       |
+| Global setup    | `server/test/global-setup.js`                         | Runs migrations once against the test database                                                                                                                                                                                     |
+| Per-test reset  | `server/test/helpers/db.js`                           | `resetDb()` runs `TRUNCATE rooms CASCADE` in `beforeEach`                                                                                                                                                                          |
+| Socket harness  | `server/test/helpers/socket-harness.js`               | `startTestServer(overrides)` → `{ url, close }`; `connectClient(url, token)` with `forceNew: true`, `reconnection: false` unless a test opts in; `waitFor(socket, event, { timeout })`; `emitWithAck` is built into Socket.IO 4.6+ |
+| Packet recorder | `server/test/helpers/recorder.js`                     | Wraps a client with `socket.onAny()` (a Socket.IO listener for every incoming event), storing `[event, payload]`. `findKeyDeep(packets, "value")` scans nested objects for leaks                                                   |
+| Builders        | `server/test/builders.js`                             | `buildRoomState({ status, voters: 3, votes: { 0: "5" } })` for unit tests; `createRoomViaApi()` and `joinViaApi()` for integration tests                                                                                           |
+| Fake data       | builders                                              | Names like "Test Voter 1"; never real names                                                                                                                                                                                        |
+| Clock           | test helper                                           | `fakeClock()` wraps Vitest fake timers into the RoomService `clock` shape                                                                                                                                                          |
+| E2E             | `e2e/playwright.config.js`                            | `webServer` starts the built app against the test database; `projects` for 375×812 and 1280×800; a `checkA11y(page)` helper wraps `@axe-core/playwright`                                                                           |
+| Coverage        | `vitest.config.js`                                    | v8 provider; thresholds `server/src/rooms/**` 90, `server/src/middleware/**` 90, global 80                                                                                                                                         |
+| CI              | `.github/workflows/ci.yml`                            | Jobs: lint → unit/integration (Postgres service container) → e2e (from phase 8) → `npm audit --audit-level=high`                                                                                                                   |
 
 **What may be mocked:** only external boundaries. That means the clock, randomness (inject a random source), and the database **only** in queue-ordering and persistence-failure unit tests. Everything else uses the real implementation and a real Postgres.
 

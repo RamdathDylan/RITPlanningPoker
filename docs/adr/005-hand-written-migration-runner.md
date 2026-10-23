@@ -20,10 +20,12 @@ It runs as the one-shot `migrate` service in Docker Compose, using the `pp_migra
 ## Options considered
 
 ### Option A: Hand-written runner (chosen)
+
 **Pros:** no dependency; fully understood; plain SQL files.
 **Cons:** no down-migrations. Rollback means writing a new forward migration.
 
 ### Option B: node-pg-migrate 9.0.0
+
 **Pros:** mature, supports down-migrations.
 **Cons:** new dependency and conventions; JavaScript-based migrations by default.
 

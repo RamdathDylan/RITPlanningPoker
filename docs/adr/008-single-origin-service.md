@@ -15,10 +15,12 @@ CORS stays configured and restricted to `CLIENT_ORIGIN`, as CLAUDE.md requires. 
 ## Options considered
 
 ### Option A: Single origin (chosen)
+
 **Pros:** one container to deploy; no cross-origin requests; a simpler Content-Security-Policy (`'self'`).
 **Cons:** Node serves static files; negligible at this scale.
 
 ### Option B: Separate static host + API
+
 **Pros:** CDN caching.
 **Cons:** two deployments, cross-origin configuration, and a looser CSP.
 

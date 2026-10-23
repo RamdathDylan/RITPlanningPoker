@@ -15,14 +15,17 @@ CLAUDE.md requires plain CSS and tokens for every color, space, size, radius, an
 ## Options considered
 
 ### Option A: Tokens + CSS Modules (chosen)
+
 **Pros:** standard CSS; scoped class names; no dependency.
 **Cons:** more files than a utility framework.
 
 ### Option B: Tailwind CSS
+
 **Pros:** fast to build with.
 **Cons:** not plain CSS; a new dependency and build step; harder to enforce our own token names.
 
 ### Option C: A component library such as MUI
+
 **Pros:** accessible components out of the box.
 **Cons:** large; hides the accessibility work Dylan needs to understand; fights the token system.
 

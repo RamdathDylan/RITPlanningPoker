@@ -13,22 +13,25 @@ Each live room is held in server memory and changed only through the pure state 
 ## Options considered
 
 ### Option A: Memory + write-through (chosen)
-| Dimension | Assessment |
-|---|---|
-| Complexity | Medium. Needs hydration code and the per-room queue (ADR-009) |
-| Cost | None beyond Postgres |
-| Scalability | One process only |
-| Familiarity | Plain JavaScript objects plus SQL |
+
+| Dimension   | Assessment                                                    |
+| ----------- | ------------------------------------------------------------- |
+| Complexity  | Medium. Needs hydration code and the per-room queue (ADR-009) |
+| Cost        | None beyond Postgres                                          |
+| Scalability | One process only                                              |
+| Familiarity | Plain JavaScript objects plus SQL                             |
 
 **Pros:** reads cost nothing; the state machine stays pure and easy to test; restarts lose nothing that was acknowledged.
 **Cons:** memory and database could drift if a write path is forgotten. Mitigated by a hydration round-trip test: persist, reload, compare.
 
 ### Option B: Database only
+
 Every event reads the room from Postgres, applies the change, and writes it back.
 **Pros:** no drift and no hydration logic.
 **Cons:** several queries per vote, and concurrent events need row locks or serializable transactions, which are harder to reason about than a queue.
 
 ### Option C: Redis as the live store
+
 **Pros:** shared across multiple servers.
 **Cons:** another service to run, secure, and back up on a self-hosted machine. Not needed at this scale.
 
