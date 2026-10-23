@@ -3,6 +3,8 @@ import {
   participantDisconnected,
   participantJoined,
   participantLeft,
+  participantRemoved,
+  roleChanged,
 } from "./participants.js";
 import { reject } from "./results.js";
 
@@ -11,6 +13,8 @@ const handlers = {
   participantLeft,
   participantConnected,
   participantDisconnected,
+  roleChanged,
+  participantRemoved,
 };
 
 // The room state machine: reduce(state, action, now) -> { ok, state, effects } | { ok, code }.

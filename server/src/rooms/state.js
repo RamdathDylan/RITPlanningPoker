@@ -28,6 +28,11 @@ export function findParticipant(state, participantId) {
   return state.participants.find((participant) => participant.id === participantId);
 }
 
+// Checked against server state on every facilitator action; never trusted from the client.
+export function isFacilitator(state, participantId) {
+  return state.facilitatorId === participantId && Boolean(findParticipant(state, participantId));
+}
+
 function earliestJoined(participants) {
   return participants.reduce(
     (earliest, participant) =>

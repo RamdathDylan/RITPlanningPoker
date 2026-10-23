@@ -1,6 +1,12 @@
-import { LIMITS } from "../../../shared/events.js";
+import { LIMITS, ROLES } from "../../../shared/events.js";
 import { accept, reject } from "./results.js";
-import { chooseSuccessor, createParticipant, findParticipant, withoutVote } from "./state.js";
+import {
+  chooseSuccessor,
+  createParticipant,
+  findParticipant,
+  isFacilitator,
+  withoutVote,
+} from "./state.js";
 
 const sameName = (a, b) => a.toLowerCase() === b.toLowerCase();
 
@@ -66,4 +72,35 @@ export function participantDisconnected(state, { participantId }, now) {
   const next = updateParticipant(state, participantId, { connected: false, disconnectedAt: now });
   const effects = state.facilitatorId === participantId ? [{ type: "scheduleHandoff" }] : [];
   return accept(next, effects);
+}
+
+export function roleChanged(state, { actorId, role }) {
+  if (!findParticipant(state, actorId)) {
+    return reject("FORBIDDEN");
+  }
+  if (!ROLES.includes(role)) {
+    return reject("INVALID_PAYLOAD");
+  }
+  if (state.status === "ended") {
+    return reject("INVALID_STATE");
+  }
+  const next = updateParticipant(state, actorId, { role });
+  return accept(role === "observer" ? { ...next, round: withoutVote(next.round, actorId) } : next);
+}
+
+export function participantRemoved(state, { actorId, participantId }) {
+  if (!isFacilitator(state, actorId)) {
+    return reject("FORBIDDEN");
+  }
+  if (participantId === actorId || !findParticipant(state, participantId)) {
+    return reject("INVALID_TARGET");
+  }
+  return accept(
+    {
+      ...state,
+      participants: state.participants.filter((participant) => participant.id !== participantId),
+      round: withoutVote(state.round, participantId),
+    },
+    [{ type: "disconnectParticipant", participantId, reason: "kicked" }],
+  );
 }
