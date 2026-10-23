@@ -45,7 +45,8 @@ describe("socket event wrapper", () => {
       socket.emit("room:join", { code: room.code }, () => {});
     }
 
-    expect(await kicked).toBe("io server disconnect");
+    const [reason] = await kicked;
+    expect(reason).toBe("io server disconnect");
   });
 
   it("survives an event sent without an acknowledgement callback", async () => {
