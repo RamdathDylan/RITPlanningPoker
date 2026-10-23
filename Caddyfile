@@ -1,0 +1,7 @@
+# Caddy terminates HTTPS and gets and renews the certificate automatically for $DOMAIN.
+# It forwards everything, including WebSockets, to the app. Access logging is off (Caddy's
+# default without a "log" directive), so visitors' IP addresses are not written to disk.
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:3000
+}

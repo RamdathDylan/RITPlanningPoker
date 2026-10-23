@@ -1,0 +1,82 @@
+# Production stack for the self-hosted droplet (ADR-006). Run with:
+#   docker compose -f compose.prod.yml up -d
+# Every secret comes from the .env file next to this one on the server, never from the repo.
+name: planning-poker
+
+x-app-image: &app-image ${APP_IMAGE:-ghcr.io/ramdathdylan/ritplanningpoker:latest}
+
+services:
+  caddy:
+    image: caddy:2.11.7
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+
+  app:
+    image: *app-image
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      CLIENT_ORIGIN: https://${DOMAIN:?set DOMAIN in .env}
+      DATABASE_URL: postgres://pp_app:${PP_APP_PASSWORD:?set PP_APP_PASSWORD in .env}@db:5432/planning_poker
+    # The app writes nothing to disk, so its filesystem is read-only.
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    # Graceful shutdown finishes within 14 s (server/src/index.js).
+    stop_grace_period: 15s
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # Runs pending migrations as the schema owner, then exits. The app starts only if it succeeds.
+  migrate:
+    image: *app-image
+    command: ["node", "server/src/db/migrate-cli.js"]
+    restart: "no"
+    environment:
+      MIGRATION_DATABASE_URL: postgres://pp_migrator:${PP_MIGRATOR_PASSWORD:?set PP_MIGRATOR_PASSWORD in .env}@db:5432/planning_poker
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # No "ports:" on purpose: Postgres is reachable only by the other containers (threat model T-28).
+  db:
+    image: postgres:17.11
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: planning_poker
+      PP_MIGRATOR_PASSWORD: ${PP_MIGRATOR_PASSWORD:?set PP_MIGRATOR_PASSWORD in .env}
+      PP_APP_PASSWORD: ${PP_APP_PASSWORD:?set PP_APP_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d planning_poker"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
