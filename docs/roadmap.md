@@ -34,6 +34,20 @@ Re-check progress against this estimate after phase 3.
 
 ---
 
+## How the build differed from this plan
+
+The PRs followed this roadmap, with these deliberate changes (each is explained in its PR):
+
+- **2.5 before 2.4:** the payload schemas needed the join-code validator.
+- **Coverage thresholds** got their own PR after 3.11; nothing enforced them before.
+- **4.4 / 4.5** were split by subject (participant actions, then stories, rounds, and votes) instead of "queries" then "persist".
+- **6.8 and 6.9 before 6.7:** the authorization matrix needed every facilitator event to exist.
+- **7.6** was split into the client room-state reducer and the `useRoom` hook.
+- **9.1:** an invalid stored seat shows an explanation with a "Join again" link instead of a silent redirect.
+- **9.4** found that Socket.IO's default heartbeat could hide a dropped phone for 45 s; it is now 10 s + 10 s.
+- **11.1** switched the E2E tests to the production setup (Express serving the built client under the real security headers).
+- Found and fixed along the way: two accessibility defects (an icon inside a button's accessible name, and a WCAG 2.5.3 label-in-name mismatch), a missing grant restriction on `schema_migrations`, no facilitator handoff after a restart, and lost acknowledgements during shutdown.
+
 ## Phase 0 — Planning documents
 
 - [x] **0.1 Planning docs.** Goal: architecture, ADRs, threat model, testing strategy, roadmap. Files: `docs/**`. Verify: Dylan's review; Mermaid renders on GitHub.
@@ -544,7 +558,7 @@ Every PR in this phase also asserts `assertInvariants(state)` after each success
   - Verify: a restore into a scratch database succeeds.
 - [ ] **11.5 Docs**
   - Goal: README (setup, commands, self-hosting), SECURITY.md (private vulnerability reporting via GitHub), LICENSE, `docs/runbook.md` (deploy, rollback, restore, rotate secrets).
-- [ ] **11.6 Server provisioning** (checklist, no code)
+- [ ] **11.6 Server provisioning** (checklist, no code; steps in [`runbook.md`](runbook.md) section 1)
   - DigitalOcean Basic Droplet, 1 GiB, NYC region (ADR-006), with a 2 GB swap file; no provider disk backups;
   - SSH keys only, no root login;
   - firewall allows only 22, 80, 443;

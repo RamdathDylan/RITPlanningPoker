@@ -50,6 +50,7 @@ First time: `cp .env.example .env`, replace the placeholder passwords, `npm inst
 - `docker compose up -d --wait` — start local Postgres (dev and test databases)
 - `npm run dev` — run the server (port 3000, restarts on changes) and Vite (http://localhost:5173) together
 - `npm test` — all unit/integration tests (needs Postgres running)
+- `npm run test:coverage` — tests with the coverage thresholds CI enforces
 - `npm run test:e2e` — Playwright tests (builds the client first)
 - `npm run lint` — ESLint + Prettier check (`npm run format` fixes formatting)
 - `npm run migrate` — apply database migrations
