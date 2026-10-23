@@ -68,7 +68,7 @@ That totals about 0.5–0.8 GB. **1 GB RAM with a 2 GB swap file** is enough, pr
 | Oracle Cloud Always Free | Ampere A1 | $0 | Reports say the free allowance was cut in mid-2026; idle instances can be reclaimed; US East capacity often unavailable. Too risky for live classes |
 | Home machine | — | $0 + electricity | Exposes your home IP; residential ISPs may block ports 80/443 or change your IP; uptime depends on home power and Wi-Fi |
 
-**Recommendation: DigitalOcean Basic Droplet, 1 GiB, NYC region, about $6/month.** Upgrade to 2 GiB ($12) if memory runs tight; resizing takes a few minutes. Add a domain name (about $10–15 a year from any registrar), since Caddy needs one to get an HTTPS certificate. Budget: about $6/month plus the domain, roughly $85–90 for the first year.
+**Recommendation: DigitalOcean Basic Droplet, 1 GiB, NYC region, about $6/month.** Upgrade to 2 GiB ($12) if memory runs tight; resizing takes a few minutes. Add a domain name (about $10–15 a year from any registrar), since Caddy needs one to get an HTTPS certificate. Budget: about $6/month plus the domain, roughly $82–87 for the first year.
 
 **Backups:** do **not** turn on the provider's whole-disk backups. They keep weeks of copies, which would break the 37-day maximum on the privacy page. Use the nightly `pg_dump` rotation instead.
 
