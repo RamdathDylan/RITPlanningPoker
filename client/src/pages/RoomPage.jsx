@@ -6,6 +6,7 @@ import BacklogPanel from "../components/BacklogPanel.jsx";
 import { cardName } from "../components/CardDeck.jsx";
 import CurrentRound from "../components/CurrentRound.jsx";
 import FacilitatorBar from "../components/FacilitatorBar.jsx";
+import LeaveRoom from "../components/LeaveRoom.jsx";
 import ParticipantList from "../components/ParticipantList.jsx";
 import RoomMessage from "../components/RoomMessage.jsx";
 import { useRoom } from "../socket/useRoom.js";
@@ -82,7 +83,7 @@ function useRevealAnnouncement(room, announce) {
 export default function RoomPage() {
   const params = useParams();
   const code = parseJoinCode(params.code);
-  const { status, room, error, removedReason, send } = useRoom(code ?? "");
+  const { status, room, error, removedReason, send, leave } = useRoom(code ?? "");
   const [announcement, setAnnouncement] = useState("");
   const [actionError, setActionError] = useState(null);
   useVotingProgress(room, setAnnouncement);
@@ -123,6 +124,13 @@ export default function RoomPage() {
     return ack.ok;
   }
 
+  async function handleLeave() {
+    const ack = await leave();
+    if (!ack.ok) {
+      setActionError(ack.error.message);
+    }
+  }
+
   async function handleVote(value) {
     const roundId = room.round.id;
     const accepted =
@@ -142,6 +150,7 @@ export default function RoomPage() {
         <p className={styles.code}>
           Room code <strong>{formatJoinCode(room.room.code)}</strong>
         </p>
+        <LeaveRoom onLeave={handleLeave} disabled={reconnecting} />
       </header>
       {actionError && (
         <p className={styles.actionError} role="alert">
