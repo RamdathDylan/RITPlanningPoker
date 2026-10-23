@@ -1,4 +1,3 @@
-import express from "express";
 import request from "supertest";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { testConfig } from "../../test/helpers/config.js";
