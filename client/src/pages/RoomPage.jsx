@@ -4,6 +4,7 @@ import { formatJoinCode, parseJoinCode } from "../../../shared/join-code.js";
 import Announcer from "../components/Announcer.jsx";
 import { cardName } from "../components/CardDeck.jsx";
 import CurrentRound from "../components/CurrentRound.jsx";
+import FacilitatorBar from "../components/FacilitatorBar.jsx";
 import ParticipantList from "../components/ParticipantList.jsx";
 import RoomMessage from "../components/RoomMessage.jsx";
 import { useRoom } from "../socket/useRoom.js";
@@ -95,17 +96,21 @@ export default function RoomPage() {
     );
   }
 
+  // Sends an action and shows the server's reason if it is refused.
+  async function runAction(event, payload) {
+    const ack = await send(event, payload);
+    setActionError(ack.ok ? null : ack.error.message);
+    return ack.ok;
+  }
+
   async function handleVote(value) {
     const roundId = room.round.id;
-    const ack =
+    const accepted =
       value === null
-        ? await send("vote:clear", { roundId })
-        : await send("vote:cast", { roundId, value });
-    if (ack.ok) {
-      setActionError(null);
+        ? await runAction("vote:clear", { roundId })
+        : await runAction("vote:cast", { roundId, value });
+    if (accepted) {
       setAnnouncement(value === null ? "Vote cleared" : `You voted ${spokenCard(value)}`);
-    } else {
-      setActionError(ack.error.message);
     }
   }
 
@@ -125,6 +130,9 @@ export default function RoomPage() {
       )}
       {room.room.status !== "ended" && (
         <CurrentRound room={room} disabled={reconnecting} onVote={handleVote} />
+      )}
+      {room.me.isFacilitator && room.room.status !== "ended" && (
+        <FacilitatorBar room={room} disabled={reconnecting} onAction={runAction} />
       )}
       <ParticipantList
         participants={room.participants}
