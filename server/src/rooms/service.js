@@ -1,8 +1,148 @@
-export function createRoomService() {
+import { loadRoomState } from "../db/hydrate.js";
+import { persist } from "../db/persist.js";
+import { withTransaction } from "../db/transaction.js";
+import { createKeyedQueue } from "./queue.js";
+import { reduce } from "./reduce.js";
+import { reject } from "./results.js";
+
+const UNLOAD_AFTER_MS = 10 * 60_000;
+
+const systemClock = {
+  now: () => Date.now(),
+  setTimeout: (callback, delayMs) => setTimeout(callback, delayMs),
+  clearTimeout: (id) => clearTimeout(id),
+};
+
+const silentLogger = { error() {} };
+
+const anyoneConnected = (state) => state.participants.some((participant) => participant.connected);
+
+// Owns live rooms in memory. Every change goes: queue -> reduce -> persist -> commit -> notify
+// (ADR-002, ADR-009). Memory changes only after the database write succeeds.
+export function createRoomService({
+  pool,
+  handoffMs,
+  clock = systemClock,
+  logger = silentLogger,
+  loadRoom = loadRoomState,
+  persistChange = persist,
+}) {
+  const rooms = new Map();
+  const queue = createKeyedQueue();
+  const listeners = new Set();
+  const timers = new Map();
+
+  function setTimer(roomId, kind, delayMs, callback) {
+    clearTimer(roomId, kind);
+    const key = `${roomId}:${kind}`;
+    timers.set(
+      key,
+      clock.setTimeout(() => {
+        timers.delete(key);
+        callback();
+      }, delayMs),
+    );
+  }
+
+  function clearTimer(roomId, kind) {
+    const key = `${roomId}:${kind}`;
+    if (timers.has(key)) {
+      clock.clearTimeout(timers.get(key));
+      timers.delete(key);
+    }
+  }
+
+  async function runSafely(description, work) {
+    try {
+      await work();
+    } catch (error) {
+      logger.error(description, { error });
+    }
+  }
+
+  function unloadIfEmpty(roomId) {
+    return queue.run(roomId, async () => {
+      const state = rooms.get(roomId);
+      if (state && !anyoneConnected(state)) {
+        rooms.delete(roomId);
+        clearTimer(roomId, "handoff");
+      }
+    });
+  }
+
+  function updateUnloadTimer(roomId, state) {
+    if (anyoneConnected(state)) {
+      clearTimer(roomId, "unload");
+    } else if (!timers.has(`${roomId}:unload`)) {
+      setTimer(roomId, "unload", UNLOAD_AFTER_MS, () =>
+        runSafely("Room unload failed", () => unloadIfEmpty(roomId)),
+      );
+    }
+  }
+
+  function applyTimerEffects(roomId, effects) {
+    for (const effect of effects) {
+      if (effect.type === "scheduleHandoff") {
+        setTimer(roomId, "handoff", handoffMs, () =>
+          runSafely("Facilitator handoff failed", () =>
+            dispatch(roomId, { type: "facilitatorHandoff", delayMs: handoffMs }),
+          ),
+        );
+      } else if (effect.type === "cancelHandoff") {
+        clearTimer(roomId, "handoff");
+      }
+    }
+  }
+
+  async function load(roomId) {
+    if (rooms.has(roomId)) {
+      return rooms.get(roomId);
+    }
+    const state = await loadRoom(pool, roomId);
+    if (state) {
+      rooms.set(roomId, state);
+      updateUnloadTimer(roomId, state);
+    }
+    return state;
+  }
+
+  async function apply(roomId, action) {
+    const previous = await load(roomId);
+    if (!previous) {
+      return reject("NOT_FOUND");
+    }
+    const now = clock.now();
+    const result = reduce(previous, action, now);
+    if (!result.ok) {
+      return result;
+    }
+    try {
+      await withTransaction(pool, (client) =>
+        persistChange(client, { previous, next: result.state, action, now }),
+      );
+    } catch (error) {
+      return { ok: false, code: "INTERNAL", cause: error };
+    }
+    rooms.set(roomId, result.state);
+    applyTimerEffects(roomId, result.effects);
+    updateUnloadTimer(roomId, result.state);
+    const change = { action, state: result.state, effects: result.effects };
+    listeners.forEach((listener) => listener(roomId, change));
+    return { ok: true, state: result.state, effects: result.effects };
+  }
+
+  function dispatch(roomId, action) {
+    return queue.run(roomId, () => apply(roomId, action));
+  }
+
   return {
-    getRoom: async () => undefined,
-    dispatch: async () => ({}),
-    onChange: () => {},
-    idle: async () => {},
+    getRoom: (roomId) => queue.run(roomId, () => load(roomId)),
+    dispatch,
+    onChange(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    // Resolves when every queued room event has finished (tests and graceful shutdown).
+    idle: () => queue.drain(),
   };
 }
