@@ -84,3 +84,50 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  docker:
+    runs-on: ubuntu-latest
+    # Writing packages is only needed to publish the image from main.
+    permissions:
+      contents: read
+      packages: write
+    env:
+      # Throwaway credentials for the CI-only database container. Not secrets.
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ci-only-superuser
+      PP_MIGRATOR_PASSWORD: ci-only-migrator
+      PP_APP_PASSWORD: ci-only-app
+      IMAGE: ghcr.io/${{ github.repository_owner }}/ritplanningpoker
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: docker compose up -d --wait
+      - run: docker build -t app:ci .
+      - name: Run migrations from the image
+        run: >
+          docker run --rm --network host
+          -e MIGRATION_DATABASE_URL=postgres://pp_migrator:ci-only-migrator@localhost:5432/planning_poker
+          app:ci node server/src/db/migrate-cli.js
+      - name: Start the app and wait until Docker reports it healthy
+        run: |
+          docker run -d --name app --network host \
+            -e CLIENT_ORIGIN=https://poker.example \
+            -e DATABASE_URL=postgres://pp_app:ci-only-app@localhost:5432/planning_poker \
+            app:ci
+          for attempt in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' app)" = healthy ] && break
+            sleep 2
+          done
+          docker inspect -f '{{.State.Health.Status}}' app | grep -qx healthy
+          curl -sf http://localhost:3000/room/ABCDEFGH | grep -q "<title>Planning Poker</title>"
+      - name: Stop gracefully (exit code 0)
+        run: |
+          docker stop app
+          test "$(docker inspect -f '{{.State.ExitCode}}' app)" = 0
+      - name: Publish the image (main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker tag app:ci "$IMAGE:${{ github.sha }}"
+          docker tag app:ci "$IMAGE:latest"
+          docker push "$IMAGE:${{ github.sha }}"
+          docker push "$IMAGE:latest"
