@@ -7,12 +7,14 @@
     "cors": "2.8.6",
     "express": "5.3.0",
     "helmet": "8.3.0",
-    "pg": "8.23.1"
+    "pg": "8.23.1",
+    "socket.io": "4.8.4"
   },
   "scripts": {
     "migrate": "node --env-file-if-exists=../.env src/db/migrate-cli.js"
   },
   "devDependencies": {
+    "socket.io-client": "4.8.4",
     "supertest": "7.3.1"
   }
 }
