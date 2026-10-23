@@ -182,6 +182,9 @@ export default function RoomPage() {
             facilitatorId={room.room.facilitatorId}
             meId={room.me.participantId}
             roundOpen={room.round !== null}
+            canManage={room.me.isFacilitator && room.room.status !== "ended"}
+            disabled={reconnecting}
+            onAction={runAction}
           />
           <BacklogPanel room={room} disabled={reconnecting} onAction={runAction} />
         </div>
