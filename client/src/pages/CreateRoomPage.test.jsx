@@ -28,7 +28,7 @@ function renderPage(api) {
 
 const roomName = () => screen.getByLabelText("Room name");
 const yourName = () => screen.getByLabelText("Your name");
-const submit = () => screen.getByRole("button", { name: /create room/i });
+const submit = () => screen.getByRole("button", { name: /creat(e|ing) room/i });
 
 describe("CreateRoomPage", () => {
   it("labels both fields and states their limits", () => {
