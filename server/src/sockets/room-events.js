@@ -22,4 +22,21 @@ export const ROOM_EVENT_ACTIONS = {
     value,
   }),
   [CLIENT_EVENTS.VOTE_CLEAR]: (actorId, { roundId }) => ({ type: "voteCleared", actorId, roundId }),
+  [CLIENT_EVENTS.ROUND_REVEAL]: (actorId, { roundId }) => ({
+    type: "roundRevealed",
+    actorId,
+    roundId,
+  }),
+  [CLIENT_EVENTS.ROUND_REVOTE]: (actorId, { roundId }) => ({
+    type: "roundRevoted",
+    actorId,
+    roundId,
+    newRoundId: randomUUID(),
+  }),
+  [CLIENT_EVENTS.ESTIMATE_ACCEPT]: (actorId, { storyId, value }) => ({
+    type: "estimateAccepted",
+    actorId,
+    storyId,
+    value,
+  }),
 };

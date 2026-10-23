@@ -28,7 +28,16 @@ async function votingRoom(options) {
   const selected = waitFor(dana, "story:update");
   await dana.emitWithAck("story:select", { storyId });
   const roundId = (await selected).round.id;
-  return { room, dana, riley, olive, storyId, roundId, rileyId: rileySeat.participantId };
+  return {
+    room,
+    dana,
+    riley,
+    olive,
+    storyId,
+    roundId,
+    rileyId: rileySeat.participantId,
+    rileyToken: rileySeat.token,
+  };
 }
 
 afterEach(async () => {
@@ -101,10 +110,26 @@ describe("concurrency", () => {
   });
 
   it("never acknowledges a vote that the reveal then leaves out (50 races)", async () => {
-    let { dana, riley, olive, roundId, rileyId } = await votingRoom();
+    const setup = await votingRoom();
+    const { olive, rileyId } = setup;
+    let { roundId } = setup;
+    // ~150 events in a couple of seconds would trip the per-socket rate limit (20 per 10 s),
+    // so each person spreads their events over several of their own sockets (max 10 each).
+    const extraSockets = async (token, count) =>
+      Promise.all(
+        Array.from(
+          { length: count },
+          async () => (await connectAndJoin(server, { token, code: setup.room.code })).socket,
+        ),
+      );
+    // Fresh sockets only (the originals already spent tokens on setup): ~18 events each.
+    const danaSockets = await extraSockets(setup.room.facilitatorToken, 9);
+    const rileySockets = await extraSockets(setup.rileyToken, 4);
 
     for (let attempt = 0; attempt < 50; attempt += 1) {
-      await dana.emitWithAck("vote:cast", { roundId, value: "5" });
+      const dana = danaSockets[attempt % danaSockets.length];
+      const riley = rileySockets[attempt % rileySockets.length];
+      expect(await dana.emitWithAck("vote:cast", { roundId, value: "5" })).toEqual({ ok: true });
       const revealed = waitFor(olive, "round:revealed");
 
       const [voteAck, revealAck] = await Promise.all([
@@ -119,8 +144,8 @@ describe("concurrency", () => {
         expect(voteAck.error.code).toBe("INVALID_STATE");
       }
 
-      const next = waitFor(dana, "story:update");
-      await dana.emitWithAck("round:revote", { roundId });
+      const next = waitFor(olive, "story:update");
+      expect(await dana.emitWithAck("round:revote", { roundId })).toEqual({ ok: true });
       roundId = (await next).round.id;
     }
   }, 30_000);
