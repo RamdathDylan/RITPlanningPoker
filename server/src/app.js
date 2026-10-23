@@ -1,8 +1,10 @@
 import express from "express";
 import { createErrorHandler, notFound } from "./middleware/errors.js";
+import { applySecurityMiddleware } from "./middleware/security.js";
 
-export function createApp({ logger, apiRouters = [] }) {
+export function createApp({ config, logger, apiRouters = [] }) {
   const app = express();
+  applySecurityMiddleware(app, config);
 
   app.get("/health", (_request, response) => {
     response.json({ status: "ok" });
