@@ -15,4 +15,11 @@ export const ROOM_EVENT_ACTIONS = {
     storyId,
     roundId: randomUUID(),
   }),
+  [CLIENT_EVENTS.VOTE_CAST]: (actorId, { roundId, value }) => ({
+    type: "voteCast",
+    actorId,
+    roundId,
+    value,
+  }),
+  [CLIENT_EVENTS.VOTE_CLEAR]: (actorId, { roundId }) => ({ type: "voteCleared", actorId, roundId }),
 };

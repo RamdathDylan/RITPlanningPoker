@@ -41,7 +41,9 @@ describe("votes over sockets", () => {
   });
 
   it("tells everyone when a vote is cleared", async () => {
+    const castSeen = waitFor(sam, "vote:status");
     await riley.emitWithAck("vote:cast", { roundId, value: "5" });
+    await castSeen;
     const samSees = waitFor(sam, "vote:status");
 
     expect(await riley.emitWithAck("vote:clear", { roundId })).toEqual({ ok: true });
