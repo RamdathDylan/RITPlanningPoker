@@ -1,0 +1,25 @@
+# Local development database. Production uses a separate compose file (roadmap 11.3).
+# Credentials come from .env (copy .env.example); nothing secret is written here.
+services:
+  db:
+    image: postgres:17.11
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: planning_poker
+      PP_MIGRATOR_PASSWORD: ${PP_MIGRATOR_PASSWORD:?set PP_MIGRATOR_PASSWORD in .env}
+      PP_APP_PASSWORD: ${PP_APP_PASSWORD:?set PP_APP_PASSWORD in .env}
+    ports:
+      # Bound to localhost only, so other machines on your network can't reach it.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d planning_poker"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+volumes:
+  pgdata:
