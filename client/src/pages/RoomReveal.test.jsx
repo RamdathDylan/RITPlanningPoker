@@ -71,6 +71,30 @@ describe("reveal view", () => {
     );
   });
 
+  it("announces the reveal once, not again on later room updates", async () => {
+    const page = await revealed();
+    const announcements = [];
+    const observer = new MutationObserver(() =>
+      announcements.push(screen.getByTestId("announcer").textContent),
+    );
+    observer.observe(screen.getByTestId("announcer"), {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+
+    await page.serverSends("participant:update", {
+      participants: snapshot().participants.map((participant) => ({
+        ...participant,
+        connected: false,
+      })),
+      facilitatorId: "dana",
+    });
+    observer.disconnect();
+
+    expect(announcements).toEqual([]);
+  });
+
   it("hides the cards once votes are revealed", async () => {
     await revealed();
     expect(screen.queryByRole("group", { name: "Your estimate" })).toBeNull();

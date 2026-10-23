@@ -1,0 +1,77 @@
+.revealed {
+  margin-bottom: var(--space-5);
+}
+
+.votes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.vote {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  text-align: center;
+}
+
+.voter {
+  max-width: 100%;
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--card-height);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-1);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  animation: flip var(--duration-flip) var(--ease-standard);
+}
+
+/* Duration comes from --duration-flip, which is 0ms under prefers-reduced-motion. */
+@keyframes flip {
+  from {
+    transform: rotateY(90deg);
+  }
+  to {
+    transform: rotateY(0deg);
+  }
+}
+
+.stats {
+  font-weight: var(--font-weight-semibold);
+}
+
+.accept {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.label {
+  font-weight: var(--font-weight-semibold);
+}
+
+.select {
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+}
