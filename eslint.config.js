@@ -62,6 +62,11 @@ export default defineConfig([
     languageOptions: { globals: globals.browser },
   },
   {
+    // Callbacks passed to page.evaluate run inside the browser.
+    files: ["e2e/**/*.js"],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+  {
     files: ["server/src/**/*.js"],
     rules: {
       "no-console": "error",
