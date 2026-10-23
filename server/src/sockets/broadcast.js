@@ -12,6 +12,7 @@ const PARTICIPANT_ACTIONS = new Set([
   "facilitatorHandoff",
 ]);
 
+const VOTE_ACTIONS = new Set(["voteCast", "voteCleared"]);
 const STORY_ACTIONS = new Set([
   "storiesAdded",
   "storySelected",
@@ -24,6 +25,15 @@ const STORY_ACTIONS = new Set([
 export function createBroadcaster({ io, roomService }) {
   roomService.onChange((roomId, { action, state }) => {
     const view = toPublicView(state);
+    if (VOTE_ACTIONS.has(action.type)) {
+      // Who has voted, never what (CLAUDE.md security rule 1).
+      io.to(roomId).emit(SERVER_EVENTS.VOTE_STATUS, {
+        roundId: view.round.id,
+        votedIds: view.participants
+          .filter((participant) => participant.hasVoted)
+          .map((participant) => participant.id),
+      });
+    }
     if (STORY_ACTIONS.has(action.type)) {
       io.to(roomId).emit(SERVER_EVENTS.STORY_UPDATE, {
         stories: view.stories,
