@@ -1,13 +1,18 @@
 import { createContext, useContext } from "react";
+import { io } from "socket.io-client";
 import { createApi } from "./api.js";
 import { createSessionStore } from "./session.js";
 
 // React context: a way to hand shared objects to any component without passing them through
-// every level. Pages read the API and session store from here, so tests can provide fakes.
+// every level. Pages read the API, session store, and socket factory from here, so tests can
+// provide fakes.
 const ServicesContext = createContext(null);
 
+// Same origin as the page; the rejoin token travels only in the handshake, never in a URL.
+const connectSocket = (token) => io({ auth: { token } });
+
 export function createDefaultServices() {
-  return { api: createApi(), sessions: createSessionStore() };
+  return { api: createApi(), sessions: createSessionStore(), connectSocket };
 }
 
 export function ServicesProvider({ value, children }) {
