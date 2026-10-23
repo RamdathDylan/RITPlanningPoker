@@ -44,3 +44,9 @@ export const FIBONACCI_DECK = Object.freeze([...NUMERIC_CARDS, "?", "☕"]);
 
 export const ROLES = Object.freeze(["voter", "observer"]);
 export const ROOM_STATUSES = Object.freeze(["idle", "voting", "revealed", "ended"]);
+
+export const CLIENT_EVENT_SCHEMAS = Object.freeze({});
+
+export function validateClientEvent(_event, payload) {
+  return { ok: true, value: payload };
+}
