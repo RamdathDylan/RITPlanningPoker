@@ -45,14 +45,15 @@ Do not add new dependencies without asking first and explaining why the existing
 
 ## Commands
 
-> Update these once the repo is set up.
+First time: `cp .env.example .env`, replace the placeholder passwords, `npm install`, `npx playwright install chromium`.
 
-- `docker compose up -d` — start local Postgres
-- `npm run dev` — run client and server together
-- `npm test` — all unit/integration tests
-- `npm run test:e2e` — Playwright tests
-- `npm run lint` — ESLint + Prettier check
+- `docker compose up -d --wait` — start local Postgres (dev and test databases)
+- `npm run dev` — run the server (port 3000, restarts on changes) and Vite (http://localhost:5173) together
+- `npm test` — all unit/integration tests (needs Postgres running)
+- `npm run test:e2e` — Playwright tests (builds the client first)
+- `npm run lint` — ESLint + Prettier check (`npm run format` fixes formatting)
 - `npm run migrate` — apply database migrations
+- `npm run check:env-files` — fail if any `.env` file is tracked by git
 
 **Before saying any task is done:** run `npm run lint` and `npm test`, and report the results.
 
