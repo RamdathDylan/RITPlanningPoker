@@ -14,6 +14,13 @@ const bannedHtmlSyntax = [
   { selector: "Property[key.name='dangerouslySetInnerHTML']", message: bannedHtmlMessage },
 ];
 
+// CLAUDE.md security rule 5: codes and tokens come from node:crypto, never Math.random.
+const bannedMathRandom = {
+  object: "Math",
+  property: "random",
+  message: "Use node:crypto (randomInt, randomBytes) instead of Math.random (CLAUDE.md rule 5).",
+};
+
 export default defineConfig([
   globalIgnores(["**/dist/", "coverage/", "playwright-report/", "test-results/", "blob-report/"]),
   {
@@ -33,10 +40,17 @@ export default defineConfig([
     },
   },
   {
+    files: ["server/**/*.js", "shared/**/*.js"],
+    rules: {
+      "no-restricted-properties": ["error", bannedMathRandom],
+    },
+  },
+  {
     files: ["**/*.test.{js,jsx}", "e2e/**/*.js"],
     rules: {
       "no-restricted-properties": [
         "error",
+        bannedMathRandom,
         ...["it", "test", "describe"].flatMap((object) =>
           ["only", "skip"].map((property) => ({
             object,

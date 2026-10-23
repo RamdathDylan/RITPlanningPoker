@@ -44,6 +44,14 @@ describe("project lint rules", () => {
     expect(await ruleIdsFor(code, "server/src/example.js")).toContain("no-console");
   });
 
+  it.each(["server/src/rooms/code.js", "shared/join-code.js"])(
+    "rejects Math.random in %s, where randomness must come from crypto",
+    async (filePath) => {
+      const code = "export const pick = () => Math.random();\n";
+      expect(await ruleIdsFor(code, filePath)).toContain("no-restricted-properties");
+    },
+  );
+
   it("allows ordinary code without reporting the restricted rules", async () => {
     const code = "export const greet = (name) => `Hello ${name}`;\n";
     const ruleIds = await ruleIdsFor(code, "server/src/greet.js");
