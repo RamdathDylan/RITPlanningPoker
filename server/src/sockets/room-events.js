@@ -55,4 +55,5 @@ export const ROOM_EVENT_ACTIONS = {
     actorId,
     participantId,
   }),
+  [CLIENT_EVENTS.ROOM_END]: (actorId) => ({ type: "roomEnded", actorId }),
 };

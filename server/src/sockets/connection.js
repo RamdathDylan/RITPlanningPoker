@@ -53,6 +53,18 @@ export function registerConnectionHandlers({ io, roomService, logger }) {
       );
     }
 
+    onClientEvent(
+      socket,
+      CLIENT_EVENTS.ROOM_DELETE,
+      async ({ code }) => {
+        if (!socket.data.joined) {
+          return reject("FORBIDDEN");
+        }
+        return roomService.deleteRoom(roomId, { actorId: participantId, code });
+      },
+      options,
+    );
+
     // Several tabs share one seat, so the participant is only "disconnected" when the last
     // of their sockets in this room closes. By now this socket has already left the room.
     socket.on("disconnect", async () => {
