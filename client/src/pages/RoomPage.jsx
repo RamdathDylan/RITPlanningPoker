@@ -61,6 +61,24 @@ function terminalMessage({ status, removedReason, error, code }) {
   }
 }
 
+// "Votes revealed. Average 5.5, median 5.5, range 3 to 8." once per revealed round.
+function useRevealAnnouncement(room, announce) {
+  const revealedRoundId = room?.round?.revealed ? room.round.id : null;
+  const stats = room?.round?.stats;
+  useEffect(() => {
+    if (!revealedRoundId) {
+      return;
+    }
+    const summary =
+      stats.numericCount === 0
+        ? "No numeric votes."
+        : `Average ${stats.mean}, median ${stats.median}, range ${stats.min} to ${stats.max}.`;
+    announce(`Votes revealed. ${summary}`);
+    // The reducer keeps the same round object until the round changes, so this runs once
+    // per reveal even though other room updates keep arriving.
+  }, [revealedRoundId, stats, announce]);
+}
+
 export default function RoomPage() {
   const params = useParams();
   const code = parseJoinCode(params.code);
@@ -68,6 +86,7 @@ export default function RoomPage() {
   const [announcement, setAnnouncement] = useState("");
   const [actionError, setActionError] = useState(null);
   useVotingProgress(room, setAnnouncement);
+  useRevealAnnouncement(room, setAnnouncement);
 
   if (status === "no-seat") {
     return <Navigate replace to={`/join/${code ?? ""}`} />;
@@ -132,7 +151,12 @@ export default function RoomPage() {
       <div className={styles.layout}>
         <div className={styles.primary}>
           {room.room.status !== "ended" && (
-            <CurrentRound room={room} disabled={reconnecting} onVote={handleVote} />
+            <CurrentRound
+              room={room}
+              disabled={reconnecting}
+              onVote={handleVote}
+              onAction={runAction}
+            />
           )}
           {room.me.isFacilitator && room.room.status !== "ended" && (
             <FacilitatorBar room={room} disabled={reconnecting} onAction={runAction} />

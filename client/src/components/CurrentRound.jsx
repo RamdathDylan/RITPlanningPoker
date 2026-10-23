@@ -1,8 +1,9 @@
 import { FIBONACCI_DECK } from "../../../shared/events.js";
 import CardDeck from "./CardDeck.jsx";
+import RevealedRound from "./RevealedRound.jsx";
 import styles from "./CurrentRound.module.css";
 
-export default function CurrentRound({ room, disabled, onVote }) {
+export default function CurrentRound({ room, disabled, onVote, onAction }) {
   const story = room.stories.find((candidate) => candidate.id === room.room.currentStoryId);
 
   if (!story || !room.round) {
@@ -27,6 +28,7 @@ export default function CurrentRound({ room, disabled, onVote }) {
       {voting && room.me.role === "observer" && (
         <p className={styles.waiting}>You&apos;re observing this round.</p>
       )}
+      {room.round.revealed && <RevealedRound room={room} disabled={disabled} onAction={onAction} />}
     </section>
   );
 }
