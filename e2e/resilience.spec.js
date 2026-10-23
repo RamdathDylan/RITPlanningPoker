@@ -5,7 +5,7 @@ const banner = (page) =>
   page.getByRole("alert").filter({ hasText: "Connection lost. Reconnecting…" });
 
 test("a voter who drops offline keeps their vote when they come back", async ({ browser }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(90_000);
   const { host, code } = await createRoom(browser);
   const voter = await joinRoom(browser, code, "Riley");
   await startVoting(host);
@@ -13,7 +13,9 @@ test("a voter who drops offline keeps their vote when they come back", async ({ 
   await expect(card(voter, "5")).toHaveAttribute("aria-pressed", "true");
 
   await voter.context().setOffline(true);
-  await expect(banner(voter)).toBeVisible({ timeout: 15_000 });
+  // Offline emulation doesn't close the WebSocket; the drop is noticed when the server's
+  // heartbeat (10 s ping + 10 s timeout, server/src/server.js) goes unanswered.
+  await expect(banner(voter)).toBeVisible({ timeout: 30_000 });
   await voter.waitForTimeout(5_000);
   await voter.context().setOffline(false);
 

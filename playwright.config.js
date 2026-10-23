@@ -45,6 +45,8 @@ export default defineConfig({
         // E2E runs create many rooms from one machine.
         RATE_LIMIT_ROOM_CREATES_PER_10_MIN: "1000",
         RATE_LIMIT_JOINS_PER_MIN: "1000",
+        // Two seconds instead of a minute, so the handoff test doesn't wait a minute.
+        HANDOFF_MS: "2000",
       },
     },
     {
