@@ -2,16 +2,19 @@ import { withTransaction } from "./transaction.js";
 
 // Ids come from the app (crypto.randomUUID) so memory and database agree without a round trip.
 // The facilitator foreign key is deferred, so both rows can be inserted in one transaction.
-export function insertRoomWithFacilitator(pool, { roomId, code, name, facilitator }) {
+// Timestamps use the same `now` as the in-memory state, so a reload matches exactly.
+export function insertRoomWithFacilitator(pool, { roomId, code, name, facilitator, now }) {
+  const at = new Date(now);
   return withTransaction(pool, async (client) => {
     await client.query(
-      "INSERT INTO rooms (id, join_code, name, facilitator_id) VALUES ($1, $2, $3, $4)",
-      [roomId, code, name, facilitator.id],
+      `INSERT INTO rooms (id, join_code, name, facilitator_id, created_at, last_activity_at)
+       VALUES ($1, $2, $3, $4, $5, $5)`,
+      [roomId, code, name, facilitator.id, at],
     );
     await client.query(
-      `INSERT INTO participants (id, room_id, display_name, role, rejoin_token_hash)
-       VALUES ($1, $2, $3, 'voter', $4)`,
-      [facilitator.id, roomId, facilitator.displayName, facilitator.tokenHash],
+      `INSERT INTO participants (id, room_id, display_name, role, rejoin_token_hash, joined_at, last_seen)
+       VALUES ($1, $2, $3, 'voter', $4, $5, $5)`,
+      [facilitator.id, roomId, facilitator.displayName, facilitator.tokenHash, at],
     );
   });
 }
