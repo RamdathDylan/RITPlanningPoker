@@ -36,8 +36,8 @@ Re-check progress against this estimate after phase 3.
 
 ## Phase 0 — Planning documents
 
-- [ ] **0.1 Planning docs.** Goal: architecture, ADRs, threat model, testing strategy, roadmap. Files: `docs/**`. Verify: Dylan's review; Mermaid renders on GitHub.
-- [ ] **0.2 CLAUDE.md updates.** Goal: apply the approved CLAUDE.md diff. Files: `CLAUDE.md`. Verify: Dylan's review.
+- [x] **0.1 Planning docs.** Goal: architecture, ADRs, threat model, testing strategy, roadmap. Files: `docs/**`. Verify: Dylan's review; Mermaid renders on GitHub.
+- [x] **0.2 CLAUDE.md updates.** Goal: apply the approved CLAUDE.md diff. Files: `CLAUDE.md`. Verify: Dylan's review.
 
 ## Phase 1 — Repo, tooling, test infrastructure, CI
 
