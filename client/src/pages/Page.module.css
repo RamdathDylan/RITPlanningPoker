@@ -45,3 +45,26 @@
   border-radius: var(--radius-md);
   color: var(--color-danger);
 }
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  margin-bottom: var(--space-4);
+  cursor: pointer;
+}
+
+.checkbox input {
+  width: var(--space-5);
+  height: var(--space-5);
+  accent-color: var(--color-accent-text);
+}
+
+.notice {
+  margin: 0 0 var(--space-5);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
