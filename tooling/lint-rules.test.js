@@ -52,6 +52,25 @@ describe("project lint rules", () => {
     },
   );
 
+  it("rejects SQL built with a template literal inside query() in server source", async () => {
+    const code =
+      "export const find = (db, name) => db.query(`SELECT * FROM rooms WHERE name = '${name}'`);\n";
+    expect(await ruleIdsFor(code, "server/src/db/example.js")).toContain("no-restricted-syntax");
+  });
+
+  it("allows parameterized queries and template literals without placeholders", async () => {
+    const code = [
+      'export const find = (db, name) => db.query("SELECT * FROM rooms WHERE name = $1", [name]);',
+      "export const all = (db) => db.query(`",
+      "  SELECT * FROM rooms",
+      "`);",
+      "",
+    ].join("\n");
+    expect(await ruleIdsFor(code, "server/src/db/example.js")).not.toContain(
+      "no-restricted-syntax",
+    );
+  });
+
   it("allows ordinary code without reporting the restricted rules", async () => {
     const code = "export const greet = (name) => `Hello ${name}`;\n";
     const ruleIds = await ruleIdsFor(code, "server/src/greet.js");
