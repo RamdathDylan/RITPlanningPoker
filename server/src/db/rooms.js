@@ -41,3 +41,12 @@ export async function countLiveRooms(db) {
 export async function deleteRoom(db, roomId) {
   await db.query("DELETE FROM rooms WHERE id = $1", [roomId]);
 }
+
+// Deletes every room not used since `cutoff` (cascading to everything it owns) and returns
+// their ids so live copies can be evicted from memory.
+export async function deleteRoomsInactiveSince(db, cutoff) {
+  const { rows } = await db.query("DELETE FROM rooms WHERE last_activity_at < $1 RETURNING id", [
+    cutoff,
+  ]);
+  return rows.map((row) => row.id);
+}

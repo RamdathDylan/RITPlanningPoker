@@ -1,3 +1,4 @@
+import { systemClock } from "../clock.js";
 import { loadRoomState } from "../db/hydrate.js";
 import { deleteRoom as deleteRoomRows } from "../db/rooms.js";
 import { persist } from "../db/persist.js";
@@ -8,12 +9,6 @@ import { reject } from "./results.js";
 import { isFacilitator } from "./state.js";
 
 const UNLOAD_AFTER_MS = 10 * 60_000;
-
-const systemClock = {
-  now: () => Date.now(),
-  setTimeout: (callback, delayMs) => setTimeout(callback, delayMs),
-  clearTimeout: (id) => clearTimeout(id),
-};
 
 const silentLogger = { error() {} };
 
@@ -165,19 +160,34 @@ export function createRoomService({
         return reject("INVALID_PAYLOAD");
       }
       await deleteRoomRows(pool, roomId);
-      rooms.delete(roomId);
-      clearTimer(roomId, "handoff");
-      clearTimer(roomId, "unload");
-      const change = { action: { type: "roomDeleted", actorId }, state: null, effects: [] };
-      listeners.forEach((listener) => listener(roomId, change));
+      forgetRoom(roomId, actorId);
       return { ok: true };
     });
+  }
+
+  // Drops a room that is already gone from the database and tells listeners, so any
+  // connected sockets are removed too (used by the retention job).
+  function evictRoom(roomId) {
+    return queue.run(roomId, async () => {
+      if (rooms.has(roomId)) {
+        forgetRoom(roomId, null);
+      }
+    });
+  }
+
+  function forgetRoom(roomId, actorId) {
+    rooms.delete(roomId);
+    clearTimer(roomId, "handoff");
+    clearTimer(roomId, "unload");
+    const change = { action: { type: "roomDeleted", actorId }, state: null, effects: [] };
+    listeners.forEach((listener) => listener(roomId, change));
   }
 
   return {
     getRoom: (roomId) => queue.run(roomId, () => load(roomId)),
     dispatch,
     deleteRoom,
+    evictRoom,
     onChange(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
