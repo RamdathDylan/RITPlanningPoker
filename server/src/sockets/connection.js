@@ -2,6 +2,7 @@ import { CLIENT_EVENTS, SERVER_EVENTS } from "../../../shared/events.js";
 import { reject } from "../rooms/results.js";
 import { toViewerView } from "../rooms/projections.js";
 import { createSocketLimiter } from "./rate-limit.js";
+import { ROOM_EVENT_ACTIONS } from "./room-events.js";
 import { onClientEvent } from "./wrap.js";
 
 async function hasOtherSocket(io, roomId, participantId) {
@@ -36,6 +37,21 @@ export function registerConnectionHandlers({ io, roomService, logger }) {
       },
       options,
     );
+
+    // Every other room event: only after room:join, and always as this socket's participant.
+    for (const [event, toAction] of Object.entries(ROOM_EVENT_ACTIONS)) {
+      onClientEvent(
+        socket,
+        event,
+        async (payload) => {
+          if (!socket.data.joined) {
+            return reject("FORBIDDEN");
+          }
+          return roomService.dispatch(roomId, toAction(participantId, payload));
+        },
+        options,
+      );
+    }
 
     // Several tabs share one seat, so the participant is only "disconnected" when the last
     // of their sockets in this room closes. By now this socket has already left the room.
