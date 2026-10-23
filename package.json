@@ -12,10 +12,17 @@
     "client"
   ],
   "scripts": {
+    "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test": "vitest run"
   },
   "devDependencies": {
-    "prettier": "3.9.10"
+    "@eslint/js": "10.0.1",
+    "eslint": "10.13.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "vitest": "5.0.5"
   }
 }
