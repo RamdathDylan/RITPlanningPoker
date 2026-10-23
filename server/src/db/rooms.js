@@ -36,3 +36,8 @@ export async function countLiveRooms(db) {
   );
   return rows[0].count;
 }
+
+// Deleting the room row deletes everything it owns (ON DELETE CASCADE).
+export async function deleteRoom(db, roomId) {
+  await db.query("DELETE FROM rooms WHERE id = $1", [roomId]);
+}

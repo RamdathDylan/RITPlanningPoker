@@ -1,9 +1,11 @@
 import { loadRoomState } from "../db/hydrate.js";
+import { deleteRoom as deleteRoomRows } from "../db/rooms.js";
 import { persist } from "../db/persist.js";
 import { withTransaction } from "../db/transaction.js";
 import { createKeyedQueue } from "./queue.js";
 import { reduce } from "./reduce.js";
 import { reject } from "./results.js";
+import { isFacilitator } from "./state.js";
 
 const UNLOAD_AFTER_MS = 10 * 60_000;
 
@@ -135,9 +137,33 @@ export function createRoomService({
     return queue.run(roomId, () => apply(roomId, action));
   }
 
+  // Permanent, so it needs the facilitator and the room code typed again as confirmation.
+  function deleteRoom(roomId, { actorId, code }) {
+    return queue.run(roomId, async () => {
+      const state = await load(roomId);
+      if (!state) {
+        return reject("NOT_FOUND");
+      }
+      if (!isFacilitator(state, actorId)) {
+        return reject("FORBIDDEN");
+      }
+      if (state.code !== code) {
+        return reject("INVALID_PAYLOAD");
+      }
+      await deleteRoomRows(pool, roomId);
+      rooms.delete(roomId);
+      clearTimer(roomId, "handoff");
+      clearTimer(roomId, "unload");
+      const change = { action: { type: "roomDeleted", actorId }, state: null, effects: [] };
+      listeners.forEach((listener) => listener(roomId, change));
+      return { ok: true };
+    });
+  }
+
   return {
     getRoom: (roomId) => queue.run(roomId, () => load(roomId)),
     dispatch,
+    deleteRoom,
     onChange(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
