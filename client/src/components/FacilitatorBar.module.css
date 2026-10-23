@@ -4,7 +4,3 @@
   gap: var(--space-3);
   margin-bottom: var(--space-5);
 }
-
-.bar:empty {
-  display: none;
-}

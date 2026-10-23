@@ -9,6 +9,7 @@ import FacilitatorBar from "../components/FacilitatorBar.jsx";
 import LeaveRoom from "../components/LeaveRoom.jsx";
 import ParticipantList from "../components/ParticipantList.jsx";
 import RoomMessage from "../components/RoomMessage.jsx";
+import SessionSummary from "../components/SessionSummary.jsx";
 import { useRoom } from "../socket/useRoom.js";
 import styles from "./RoomPage.module.css";
 
@@ -170,11 +171,7 @@ export default function RoomPage() {
           {room.me.isFacilitator && room.room.status !== "ended" && (
             <FacilitatorBar room={room} disabled={reconnecting} onAction={runAction} />
           )}
-          {room.room.status === "ended" && (
-            <section aria-labelledby="ended-heading">
-              <h2 id="ended-heading">This session has ended</h2>
-            </section>
-          )}
+          {room.room.status === "ended" && <SessionSummary stories={room.stories} />}
         </div>
         <div className={styles.secondary}>
           <ParticipantList
@@ -186,7 +183,9 @@ export default function RoomPage() {
             disabled={reconnecting}
             onAction={runAction}
           />
-          <BacklogPanel room={room} disabled={reconnecting} onAction={runAction} />
+          {room.room.status !== "ended" && (
+            <BacklogPanel room={room} disabled={reconnecting} onAction={runAction} />
+          )}
         </div>
       </div>
       <Announcer message={announcement} />

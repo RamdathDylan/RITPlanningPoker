@@ -1,0 +1,22 @@
+.summary {
+  margin-bottom: var(--space-5);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.caption {
+  margin-bottom: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+  text-align: left;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+  text-align: left;
+  overflow-wrap: anywhere;
+}

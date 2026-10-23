@@ -1,4 +1,5 @@
 import buttons from "./Button.module.css";
+import ConfirmAction from "./ConfirmAction.jsx";
 import styles from "./FacilitatorBar.module.css";
 
 function nextPendingStory(stories) {
@@ -46,6 +47,15 @@ export default function FacilitatorBar({ room, disabled, onAction }) {
           Next story
         </button>
       )}
+      <ConfirmAction
+        label="End session"
+        question="End the session for everyone? Voting stops and the room becomes read-only."
+        confirmText="End session"
+        confirmAriaLabel="Confirm end session"
+        cancelText="Keep going"
+        onConfirm={() => onAction("room:end", {})}
+        disabled={disabled}
+      />
     </section>
   );
 }
