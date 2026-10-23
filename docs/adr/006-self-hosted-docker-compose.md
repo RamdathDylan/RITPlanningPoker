@@ -61,14 +61,14 @@ That totals about 0.5–0.8 GB. **1 GB RAM with a 2 GB swap file** is enough, pr
 
 | Provider | Plan | Monthly | Notes |
 |---|---|---|---|
-| **DigitalOcean (recommended)** | Basic Droplet, 1 vCPU / 1 GiB / 25 GiB SSD / 1,000 GiB transfer, NYC region | **$6** (2 GiB: $12) | From digitalocean.com/pricing/droplets. Student-friendly docs; GitHub Student Pack lists a DigitalOcean offer (credit amount unverified, and one source says it ended July 2026) |
+| **DigitalOcean (recommended)** | Basic Droplet, 1 vCPU / 1 GiB / 25 GiB SSD / 1,000 GiB transfer, NYC region | **$6** (2 GiB: $12) | From digitalocean.com/pricing/droplets. Student-friendly docs. The GitHub Student Pack DigitalOcean credit is no longer offered (confirmed by Dylan, 2026-10-22) |
 | AWS Lightsail | 1 GB / 2 vCPU burst / 40 GB / 2 TB, Virginia | $7 (2 GB: $12) | From aws.amazon.com/lightsail/pricing. Fixed price including IPv4; AWS console is more complex |
 | Azure for Students | Small B-series VM | $0 until $100 credit runs out | Via GitHub Student Pack, no card required (education.github.com/pack). Credit lasts about a year, then you must migrate or pay |
 | Hetzner | CPX11, 2 vCPU / 2 GB, Ashburn | €17.99 | hetzner.com: US plans now cost much more than EU plans and showed "currently unavailable". EU plans (€6.49) add ~100 ms latency from Rochester |
 | Oracle Cloud Always Free | Ampere A1 | $0 | Reports say the free allowance was cut in mid-2026; idle instances can be reclaimed; US East capacity often unavailable. Too risky for live classes |
 | Home machine | — | $0 + electricity | Exposes your home IP; residential ISPs may block ports 80/443 or change your IP; uptime depends on home power and Wi-Fi |
 
-**Recommendation: DigitalOcean Basic Droplet, 1 GiB, NYC region, about $6/month.** Upgrade to 2 GiB ($12) if memory runs tight; resizing takes a few minutes. Add a domain name (about $10–15 a year from any registrar), since Caddy needs one to get an HTTPS certificate. Check whether the GitHub Student Pack still offers DigitalOcean credit before paying.
+**Recommendation: DigitalOcean Basic Droplet, 1 GiB, NYC region, about $6/month.** Upgrade to 2 GiB ($12) if memory runs tight; resizing takes a few minutes. Add a domain name (about $10–15 a year from any registrar), since Caddy needs one to get an HTTPS certificate. Budget: about $6/month plus the domain, roughly $82–87 for the first year.
 
 **Backups:** do **not** turn on the provider's whole-disk backups. They keep weeks of copies, which would break the 37-day maximum on the privacy page. Use the nightly `pg_dump` rotation instead.
 
