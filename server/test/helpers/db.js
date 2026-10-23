@@ -37,3 +37,19 @@ export async function createIsolatedSchema() {
 
   return { schemaName, connect, drop };
 }
+
+// A pool connected as the app's own role (pp_app), so tests hit the real privileges.
+export function createAppPool() {
+  return new pg.Pool({ connectionString: requireEnv("TEST_DATABASE_URL"), max: 4 });
+}
+
+// Deletes all rooms (and, by cascade, everything they own) as the schema owner.
+export async function resetDatabase() {
+  const client = new pg.Client({ connectionString: requireEnv("TEST_MIGRATION_DATABASE_URL") });
+  await client.connect();
+  try {
+    await client.query("DELETE FROM rooms");
+  } finally {
+    await client.end();
+  }
+}
