@@ -1,4 +1,5 @@
 // CLAUDE.md required E2E: four voters (plus the facilitator) complete a full round.
+import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./helpers/a11y.js";
 import { card, createRoom, joinRoom, openStories } from "./helpers/room.js";
@@ -73,4 +74,19 @@ test("four voters and a facilitator complete a round", async ({ browser }, testI
     await openStories(page);
     await expect(page.getByText("Estimated: 3")).toBeVisible();
   }
+
+  // The facilitator ends the session; everyone sees the summary; the CSV downloads.
+  await host.getByRole("button", { name: "End session" }).click();
+  await host.getByRole("button", { name: "Confirm end session" }).click();
+  for (const page of Object.values(everyone)) {
+    await expect(page.getByRole("table", { name: "Estimates" })).toBeVisible();
+  }
+  await expectNoA11yViolations(host);
+  const downloading = host.waitForEvent("download");
+  await host.getByRole("button", { name: "Download CSV" }).click();
+  const download = await downloading;
+  expect(download.suggestedFilename()).toBe(`planning-poker-${code}.csv`);
+  expect(await readFile(await download.path(), "utf8")).toBe(
+    '"Story","Final estimate"\r\n"Login page","3"\r\n"Signup page",""\r\n',
+  );
 });

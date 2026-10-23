@@ -30,14 +30,14 @@ export function snapshot(overrides = {}) {
 }
 
 // Renders /room/ABCDEFGH with a fake socket the test controls like a server.
-export function renderRoomPage({ seated = true, respond } = {}) {
+export function renderRoomPage({ seated = true, respond, api = {}, saveFile = () => {} } = {}) {
   const sessions = createFakeSessions();
   if (seated) {
     sessions.save("ABCDEFGH", { participantId: "riley", token: "t".repeat(43) });
   }
   const socket = createFakeSocket({ respond });
   render(
-    <ServicesProvider value={{ api: {}, sessions, connectSocket: () => socket }}>
+    <ServicesProvider value={{ api, sessions, connectSocket: () => socket, saveFile }}>
       <MemoryRouter initialEntries={["/room/ABCDEFGH"]}>
         <Routes>
           <Route path="/room/:code" element={<RoomPage />} />

@@ -119,4 +119,33 @@ describe("createApi", () => {
     });
     expect(requests).toEqual([]);
   });
+
+  it("downloads the CSV export with the token in the Authorization header", async () => {
+    const file = new Blob(["csv"], { type: "text/csv" });
+    const requests = [];
+    const fetch = async (url, init) => {
+      requests.push({ url, init });
+      return { ok: true, status: 200, blob: async () => file };
+    };
+
+    const result = await createApi({ fetch }).exportCsv("abcd-efgh", "t".repeat(43));
+
+    expect(result).toBe(file);
+    expect(requests).toEqual([
+      {
+        url: "/api/rooms/ABCDEFGH/export.csv",
+        init: { headers: { Authorization: `Bearer ${"t".repeat(43)}` } },
+      },
+    ]);
+  });
+
+  it("explains a refused export", async () => {
+    const { fetch } = fakeFetch(403, {
+      code: "FORBIDDEN",
+      error: "You don't have permission to do that.",
+    });
+    expect(await caught(createApi({ fetch }).exportCsv("ABCDEFGH", "t".repeat(43)))).toMatchObject({
+      code: "FORBIDDEN",
+    });
+  });
 });
