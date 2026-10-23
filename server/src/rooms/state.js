@@ -41,12 +41,14 @@ function earliestJoined(participants) {
   );
 }
 
+export function earliestConnected(participants) {
+  return earliestJoined(participants.filter((participant) => participant.connected));
+}
+
 // Who takes over when the facilitator leaves: the earliest-joined connected participant,
 // otherwise the earliest-joined participant, otherwise nobody (empty room).
 export function chooseSuccessor(participants) {
-  const successor =
-    earliestJoined(participants.filter((participant) => participant.connected)) ??
-    earliestJoined(participants);
+  const successor = earliestConnected(participants) ?? earliestJoined(participants);
   return successor?.id ?? null;
 }
 
