@@ -1,3 +1,5 @@
+import path from "node:path";
+
 const NODE_ENVS = ["development", "test", "production"];
 
 // Each reader returns { value } or { problem }. Problems describe the rule that was broken
@@ -87,6 +89,9 @@ export function loadConfig(env = process.env) {
     }),
     maxLiveRooms: positive("MAX_LIVE_ROOMS", 200),
     handoffMs: positive("HANDOFF_MS", 60_000),
+    // Folder of the built client (client/dist). Unset in development, where Vite serves it.
+    // Resolved to an absolute path, which Express needs to send files.
+    clientDist: env.CLIENT_DIST_DIR ? path.resolve(env.CLIENT_DIST_DIR) : null,
   };
 
   if (problems.length > 0) {
