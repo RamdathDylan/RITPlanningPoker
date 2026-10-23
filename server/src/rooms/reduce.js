@@ -1,3 +1,4 @@
+import { facilitatorHandoff, facilitatorTransferred, roomEnded } from "./facilitator.js";
 import {
   participantConnected,
   participantDisconnected,
@@ -25,6 +26,9 @@ const handlers = {
   roundRevealed,
   roundRevoted,
   estimateAccepted,
+  facilitatorTransferred,
+  facilitatorHandoff,
+  roomEnded,
 };
 
 // The room state machine: reduce(state, action, now) -> { ok, state, effects } | { ok, code }.
