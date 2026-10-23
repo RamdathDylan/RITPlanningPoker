@@ -10,8 +10,30 @@ try {
   }
 }
 
+const strict = { lines: 90, functions: 90, branches: 90, statements: 90 };
+
 export default defineConfig({
   test: {
+    // Coverage is a check, not a goal (CLAUDE.md): it flags untested areas.
+    coverage: {
+      provider: "v8",
+      include: ["server/src/**/*.js", "shared/**/*.js", "client/src/**/*.{js,jsx}"],
+      exclude: [
+        "**/*.test.{js,jsx}",
+        // Entry points that only wire things together; covered by E2E and smoke runs.
+        "server/src/index.js",
+        "server/src/db/migrate-cli.js",
+        "client/src/main.jsx",
+      ],
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 80,
+        statements: 80,
+        "server/src/rooms/**": strict,
+        "server/src/middleware/**": strict,
+      },
+    },
     projects: [
       {
         test: {

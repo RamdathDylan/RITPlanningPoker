@@ -43,7 +43,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: docker compose up -d --wait
-      - run: npm test
+      - run: npm run test:coverage
 
   audit:
     runs-on: ubuntu-latest
