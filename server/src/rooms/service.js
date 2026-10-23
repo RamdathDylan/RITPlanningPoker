@@ -100,10 +100,24 @@ export function createRoomService({
     if (rooms.has(roomId)) {
       return rooms.get(roomId);
     }
-    const state = await loadRoom(pool, roomId);
-    if (state) {
-      rooms.set(roomId, state);
-      updateUnloadTimer(roomId, state);
+    const loaded = await loadRoom(pool, roomId);
+    if (!loaded) {
+      return null;
+    }
+    // After a restart nobody is connected yet. Treat everyone as disconnected since now, so a
+    // facilitator who never comes back is still handed off after the usual delay.
+    const now = clock.now();
+    const state = {
+      ...loaded,
+      participants: loaded.participants.map((participant) => ({
+        ...participant,
+        disconnectedAt: now,
+      })),
+    };
+    rooms.set(roomId, state);
+    updateUnloadTimer(roomId, state);
+    if (state.status !== "ended" && state.facilitatorId) {
+      applyTimerEffects(roomId, [{ type: "scheduleHandoff" }]);
     }
     return state;
   }
