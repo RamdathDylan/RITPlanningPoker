@@ -13,7 +13,13 @@ export const START = Date.UTC(2026, 9, 23, 12, 0, 0);
 export async function createPersistedRoom(pool, { code = "ABCDEFGH" } = {}) {
   const facilitator = { id: randomUUID(), displayName: "Dana", tokenHash: randomBytes(32) };
   const roomId = randomUUID();
-  await insertRoomWithFacilitator(pool, { roomId, code, name: "Sprint 12", facilitator });
+  await insertRoomWithFacilitator(pool, {
+    roomId,
+    code,
+    name: "Sprint 12",
+    facilitator,
+    now: START,
+  });
   let state = createRoomState({ id: roomId, code, name: "Sprint 12", facilitator, now: START });
 
   async function apply(action, now = START) {

@@ -12,6 +12,7 @@ function newRoom(overrides = {}) {
     code: "ABCDEFGH",
     name: "Sprint 12",
     facilitator: { id: randomUUID(), displayName: "Dana", tokenHash: randomBytes(32) },
+    now: Date.UTC(2026, 9, 23, 12, 0, 0),
     ...overrides,
   };
 }

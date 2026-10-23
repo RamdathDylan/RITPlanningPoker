@@ -1,12 +1,12 @@
 // Writes one accepted state change to Postgres. Called inside a transaction by RoomService,
 // before the new state is committed to memory (ADR-002, ADR-009).
 
-async function insertParticipant(client, { action, next }) {
+async function insertParticipant(client, { action, next, now }) {
   const { id, displayName, role, tokenHash } = action.participant;
   await client.query(
-    `INSERT INTO participants (id, room_id, display_name, role, rejoin_token_hash)
-     VALUES ($1, $2, $3, $4, $5)`,
-    [id, next.id, displayName, role, tokenHash],
+    `INSERT INTO participants (id, room_id, display_name, role, rejoin_token_hash, joined_at, last_seen)
+     VALUES ($1, $2, $3, $4, $5, $6, $6)`,
+    [id, next.id, displayName, role, tokenHash, new Date(now)],
   );
 }
 
