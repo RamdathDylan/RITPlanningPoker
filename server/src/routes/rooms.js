@@ -3,11 +3,14 @@ import express from "express";
 import { errorFor } from "../../../shared/errors.js";
 import { parseJoinCode } from "../../../shared/join-code.js";
 import { CREATE_ROOM_BODY, JOIN_ROOM_BODY } from "../../../shared/requests.js";
-import { generateRejoinToken, hashToken } from "../auth/tokens.js";
+import { generateRejoinToken, hashToken, isWellFormedToken } from "../auth/tokens.js";
+import { findParticipantByTokenHash } from "../db/participants.js";
+import { toCsv } from "../export/csv.js";
 import { countLiveRooms, findRoomByCode, insertRoomWithFacilitator } from "../db/rooms.js";
 import { createRateLimiter } from "../middleware/rate-limit.js";
 import { validateBody } from "../middleware/validate.js";
 import { generateJoinCode } from "../rooms/code.js";
+import { isFacilitator } from "../rooms/state.js";
 
 const MAX_CODE_ATTEMPTS = 3;
 const UNIQUE_VIOLATION = "23505";
@@ -58,6 +61,7 @@ export function createRoomsRouter({
     limit: rateLimits.roomCreatesPer10Minutes,
   });
   const joinLimiter = createRateLimiter({ windowMs: 60_000, limit: rateLimits.joinsPerMinute });
+  const exportLimiter = createRateLimiter({ windowMs: 60_000, limit: rateLimits.exportsPerMinute });
 
   router.post(
     "/rooms",
@@ -120,6 +124,41 @@ export function createRoomsRouter({
       }
     },
   );
+
+  // The token must come in the Authorization header; tokens never go in URLs (T-05).
+  router.get("/rooms/:code/export.csv", exportLimiter, async (request, response) => {
+    const token = /^Bearer (\S+)$/.exec(request.get("Authorization") ?? "")?.[1];
+    if (!isWellFormedToken(token)) {
+      sendError(response, 401, "UNAUTHORIZED");
+      return;
+    }
+    const code = parseJoinCode(request.params.code);
+    const room = code ? await findRoomByCode(pool, code) : null;
+    const participant = await findParticipantByTokenHash(pool, hashToken(token));
+    if (!room || !participant || participant.roomId !== room.id) {
+      sendError(response, 404, "NOT_FOUND");
+      return;
+    }
+    const state = await roomService.getRoom(room.id);
+    if (!isFacilitator(state, participant.id)) {
+      sendError(response, 403, "FORBIDDEN");
+      return;
+    }
+
+    const stories = [...state.stories].sort((a, b) => a.position - b.position);
+    const csv = toCsv([
+      ["Story", "Final estimate"],
+      ...stories.map((story) => [story.title, story.finalEstimate]),
+    ]);
+    response
+      .status(200)
+      .set({
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="planning-poker-${room.code}.csv"`,
+        "Cache-Control": "no-store",
+      })
+      .send(csv);
+  });
 
   return router;
 }
