@@ -31,8 +31,10 @@ describe("socket server", () => {
   it("drops a connection whose packet is larger than 64 KB and keeps serving", async () => {
     const oversized = server.connectClient({ auth: { token: "a".repeat(100 * 1024) } });
 
-    const error = await waitFor(oversized, "connect_error");
-    expect(error.message).not.toBe("Unauthorized");
+    // The transport itself closes the connection, so the client sees "disconnect"
+    // rather than the "connect_error" our auth middleware would cause.
+    const [reason] = await waitFor(oversized, "disconnect");
+    expect(reason).toBe("transport close");
     expect(oversized.connected).toBe(false);
 
     expect((await request(server.url).get("/health")).status).toBe(200);
