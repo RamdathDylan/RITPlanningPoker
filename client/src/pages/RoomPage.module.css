@@ -59,3 +59,7 @@
     align-items: start;
   }
 }
+
+.danger {
+  margin-top: var(--space-7);
+}

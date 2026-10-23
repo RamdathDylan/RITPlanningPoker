@@ -5,6 +5,7 @@ import Announcer from "../components/Announcer.jsx";
 import BacklogPanel from "../components/BacklogPanel.jsx";
 import { cardName } from "../components/CardDeck.jsx";
 import CurrentRound from "../components/CurrentRound.jsx";
+import DeleteRoom from "../components/DeleteRoom.jsx";
 import FacilitatorBar from "../components/FacilitatorBar.jsx";
 import LeaveRoom from "../components/LeaveRoom.jsx";
 import ParticipantList from "../components/ParticipantList.jsx";
@@ -188,6 +189,15 @@ export default function RoomPage() {
               stories={room.stories}
               onExport={room.me.isFacilitator ? handleExport : undefined}
             />
+          )}
+          {room.me.isFacilitator && (
+            <div className={styles.danger}>
+              <DeleteRoom
+                code={room.room.code}
+                disabled={reconnecting}
+                onDelete={(confirmedCode) => runAction("room:delete", { code: confirmedCode })}
+              />
+            </div>
           )}
         </div>
         <div className={styles.secondary}>
