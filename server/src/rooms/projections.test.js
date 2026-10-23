@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { NOW, buildRoom, buildVotingRoom } from "../../test/builders.js";
 import { findKeyDeep } from "../../test/helpers/recorder.js";
 import { toPublicView, toViewerView } from "./projections.js";
+import { computeStats } from "./stats.js";
 
 // voter-1 voted "13", voter-2 voted "21": distinctive values that appear nowhere else.
 const votingRoom = () =>
@@ -101,6 +102,7 @@ describe("views after the reveal", () => {
         { participantId: "voter-1", value: "13" },
         { participantId: "voter-2", value: "21" },
       ],
+      stats: computeStats(["13", "21"]),
     });
   });
 });
