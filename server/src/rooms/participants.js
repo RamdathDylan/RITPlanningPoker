@@ -34,3 +34,36 @@ export function participantLeft(state, { actorId }) {
     round: withoutVote(state.round, actorId),
   });
 }
+
+function updateParticipant(state, participantId, changes) {
+  return {
+    ...state,
+    participants: state.participants.map((participant) =>
+      participant.id === participantId ? { ...participant, ...changes } : participant,
+    ),
+  };
+}
+
+export function participantConnected(state, { participantId }, now) {
+  if (!findParticipant(state, participantId)) {
+    return reject("NOT_FOUND");
+  }
+  const next = updateParticipant(state, participantId, {
+    connected: true,
+    connectedAt: now,
+    disconnectedAt: null,
+  });
+  const effects = state.facilitatorId === participantId ? [{ type: "cancelHandoff" }] : [];
+  return accept(next, effects);
+}
+
+// Sent by the server only when a participant's last open socket closes.
+// The seat and any vote are kept so a reconnect restores them.
+export function participantDisconnected(state, { participantId }, now) {
+  if (!findParticipant(state, participantId)) {
+    return reject("NOT_FOUND");
+  }
+  const next = updateParticipant(state, participantId, { connected: false, disconnectedAt: now });
+  const effects = state.facilitatorId === participantId ? [{ type: "scheduleHandoff" }] : [];
+  return accept(next, effects);
+}
