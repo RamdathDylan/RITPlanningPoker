@@ -1,12 +1,12 @@
 # ADR-006: Self-host with Docker Compose behind Caddy
 
-**Status:** Proposed · **Date:** 2026-10-22 · **Deciders:** Dylan Ramdath
+**Status:** Accepted · **Date:** 2026-10-22 · **Deciders:** Dylan Ramdath
 
 ## Context
 
 Dylan hosts the app personally, with no university infrastructure involved. The deployment needs HTTPS, an always-on process (sleeping hosts drop live sockets), Postgres with backups, migrations as a deploy step, and safe restarts. It must be simple enough for one person to run.
 
-**Machine:** a rented virtual private server (VPS). See "Server recommendation" below.
+**Machine:** a DigitalOcean Basic Droplet (1 GiB, NYC region), accepted by Dylan on 2026-10-22. See "Server recommendation" below.
 
 ## Decision
 
