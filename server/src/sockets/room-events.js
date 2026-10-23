@@ -39,4 +39,20 @@ export const ROOM_EVENT_ACTIONS = {
     storyId,
     value,
   }),
+  [CLIENT_EVENTS.ROOM_LEAVE]: (actorId) => ({ type: "participantLeft", actorId }),
+  [CLIENT_EVENTS.PARTICIPANT_REMOVE]: (actorId, { participantId }) => ({
+    type: "participantRemoved",
+    actorId,
+    participantId,
+  }),
+  [CLIENT_EVENTS.PARTICIPANT_SET_ROLE]: (actorId, { role }) => ({
+    type: "roleChanged",
+    actorId,
+    role,
+  }),
+  [CLIENT_EVENTS.FACILITATOR_TRANSFER]: (actorId, { participantId }) => ({
+    type: "facilitatorTransferred",
+    actorId,
+    participantId,
+  }),
 };

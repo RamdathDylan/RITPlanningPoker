@@ -19,7 +19,7 @@ export function createServer({ config, logger, pool, roomService }) {
   });
   io.use(createSocketAuth({ pool, logger }));
   registerConnectionHandlers({ io, roomService, logger });
-  createBroadcaster({ io, roomService });
+  createBroadcaster({ io, roomService, logger });
 
   return {
     io,
