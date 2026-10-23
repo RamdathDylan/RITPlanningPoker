@@ -1,0 +1,19 @@
+.page {
+  flex: 1;
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+.title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.lead {
+  margin: 0 0 var(--space-5);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+}

@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
 import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
+import reactHooks from "eslint-plugin-react-hooks";
 
 const bannedHtmlMessage =
   "Render user text as React text. dangerouslySetInnerHTML is banned (CLAUDE.md rule 8).";
@@ -53,6 +54,12 @@ export default defineConfig([
         },
       ],
     },
+  },
+  {
+    files: ["client/**/*.{js,jsx}"],
+    ignores: ["client/vite.config.js"],
+    extends: [reactHooks.configs.flat.recommended],
+    languageOptions: { globals: globals.browser },
   },
   {
     files: ["server/src/**/*.js"],

@@ -1,0 +1,34 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+h1,
+h2,
+h3 {
+  line-height: var(--line-height-heading);
+}
+
+a {
+  color: var(--color-accent-text);
+}
+
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent-text);
+  outline-offset: var(--focus-ring-offset);
+}
