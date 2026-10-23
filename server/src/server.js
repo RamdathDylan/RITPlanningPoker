@@ -33,6 +33,8 @@ export function createServer({ config, logger, pool, roomService }) {
     io,
     listen: (port) =>
       new Promise((resolve) => httpServer.listen(port, () => resolve(httpServer.address().port))),
+    // Refuses new connections; existing ones stay open until close().
+    stopAccepting: () => httpServer.close(),
     close: () => new Promise((resolve) => io.close(() => resolve())),
   };
 }
