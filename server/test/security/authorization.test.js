@@ -39,7 +39,11 @@ describe("facilitator-only events", () => {
     await sockets.facilitator.emitWithAck("story:select", { storyId });
     roundId = (await selected).round.id;
     await sockets.voter.emitWithAck("vote:cast", { roundId, value: "5" });
+    // Wait until every client has received the reveal, so setup broadcasts can't be
+    // mistaken for broadcasts caused by the cases below.
+    const revealSeen = Object.values(sockets).map((socket) => waitFor(socket, "round:revealed"));
     await sockets.facilitator.emitWithAck("round:reveal", { roundId });
+    await Promise.all(revealSeen);
   });
 
   afterAll(async () => {
