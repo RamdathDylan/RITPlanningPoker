@@ -93,3 +93,30 @@ export async function connectionOutcome(socket) {
     socket.once("connect_error", (error) => resolve(error.message));
   });
 }
+
+// Connects with a token and completes room:join, returning the socket and its room:state.
+export async function connectAndJoin(server, { token, code }) {
+  const socket = server.connectClient({ auth: { token } });
+  const outcome = await connectionOutcome(socket);
+  if (outcome !== "connected") {
+    throw new Error(`Could not connect: ${outcome}`);
+  }
+  const stateArrives = waitFor(socket, "room:state");
+  const ack = await socket.emitWithAck("room:join", { code });
+  if (!ack.ok) {
+    throw new Error(`room:join failed: ${ack.error.code}`);
+  }
+  return { socket, state: await stateArrives };
+}
+
+// Resolves when no event arrives for `quietMs`, to assert something was NOT sent.
+export function nothingReceived(socket, event, quietMs = 150) {
+  return new Promise((resolve, reject) => {
+    const onEvent = () => reject(new Error(`Unexpected "${event}"`));
+    socket.once(event, onEvent);
+    setTimeout(() => {
+      socket.off(event, onEvent);
+      resolve();
+    }, quietMs);
+  });
+}
