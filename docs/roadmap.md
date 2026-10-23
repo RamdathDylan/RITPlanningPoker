@@ -113,7 +113,7 @@ Every later phase can start with failing tests once this is done.
   - Green scope: `e2e/` config with `webServer`, `checkA11y` helper, e2e CI job.
 - [ ] **1.12 ⚙️ Dev command**
   - Goal: `npm run dev` runs client and server together; Vite proxies `/api` and `/socket.io`.
-  - Verify: `npm run dev`, then the landing page loads and `/api/health` returns ok through the proxy.
+  - Verify: `npm run dev`, then the landing page loads, and `/health` and the Socket.IO handshake work through the Vite proxy.
 
 ## Phase 2 — Shared contract and validators
 

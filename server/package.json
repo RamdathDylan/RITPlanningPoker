@@ -12,7 +12,8 @@
   },
   "scripts": {
     "migrate": "node --env-file-if-exists=../.env src/db/migrate-cli.js",
-    "start": "node --env-file-if-exists=../.env src/index.js"
+    "start": "node --env-file-if-exists=../.env src/index.js",
+    "dev": "node --watch --env-file-if-exists=../.env src/index.js"
   },
   "devDependencies": {
     "socket.io-client": "4.8.4",
