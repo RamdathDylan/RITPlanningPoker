@@ -1,4 +1,6 @@
+import buttons from "./Button.module.css";
 import { CheckIcon, WaitingIcon } from "./icons.jsx";
+import ParticipantTools from "./ParticipantTools.jsx";
 import styles from "./ParticipantList.module.css";
 
 function VoteStatus({ hasVoted }) {
@@ -13,7 +15,15 @@ function VoteStatus({ hasVoted }) {
   );
 }
 
-export default function ParticipantList({ participants, facilitatorId, meId, roundOpen }) {
+export default function ParticipantList({
+  participants,
+  facilitatorId,
+  meId,
+  roundOpen,
+  canManage = false,
+  disabled = false,
+  onAction = () => {},
+}) {
   return (
     <section className={styles.panel} aria-labelledby="participants-heading">
       <h2 className={styles.heading} id="participants-heading">
@@ -36,6 +46,23 @@ export default function ParticipantList({ participants, facilitatorId, meId, rou
                 <VoteStatus hasVoted={participant.hasVoted} />
               )}
             </span>
+            {participant.id === meId && (
+              <button
+                className={buttons.secondary}
+                type="button"
+                disabled={disabled}
+                onClick={() =>
+                  onAction("participant:setRole", {
+                    role: participant.role === "voter" ? "observer" : "voter",
+                  })
+                }
+              >
+                {participant.role === "voter" ? "Switch to observer" : "Switch to voter"}
+              </button>
+            )}
+            {canManage && participant.id !== meId && (
+              <ParticipantTools participant={participant} disabled={disabled} onAction={onAction} />
+            )}
           </li>
         ))}
       </ul>
