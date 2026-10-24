@@ -16,7 +16,6 @@ const origin = `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: "e2e",
-  globalSetup: "./e2e/global-setup.js",
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
@@ -33,7 +32,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run build -w client && npm run start -w server",
+    // Migrate first, as a deploy does, so the server never starts on an empty database.
+    command: "npm run migrate && npm run build -w client && npm run start -w server",
     url: `${origin}/health`,
     reuseExistingServer: !process.env.CI,
     env: {
@@ -42,6 +42,7 @@ export default defineConfig({
       CLIENT_ORIGIN: origin,
       CLIENT_DIST_DIR: "../client/dist",
       DATABASE_URL: process.env.TEST_DATABASE_URL ?? "",
+      MIGRATION_DATABASE_URL: process.env.TEST_MIGRATION_DATABASE_URL ?? "",
       // E2E runs create many rooms from one machine.
       RATE_LIMIT_ROOM_CREATES_PER_10_MIN: "1000",
       RATE_LIMIT_JOINS_PER_MIN: "1000",

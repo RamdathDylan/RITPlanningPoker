@@ -80,8 +80,8 @@ describe("ending a session", () => {
 
     expect(screen.queryByRole("group", { name: "Your estimate" })).toBeNull();
     expect(screen.queryByRole("region", { name: "Facilitator controls" })).toBeNull();
-    expect(screen.queryByLabelText("Add stories")).toBeNull();
-    expect(screen.queryByRole("button", { name: /^Vote on / })).toBeNull();
+    expect(screen.queryByLabelText("New stories")).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Start voting on / })).toBeNull();
   });
 
   it("says when no stories were estimated", async () => {

@@ -25,9 +25,9 @@ test("four voters and a facilitator complete a round", async ({ browser }, testI
 
   // Facilitator adds stories and starts voting on the first.
   await openStories(host);
-  await host.getByLabel("Add stories").fill("Login page\nSignup page");
-  await host.getByRole("button", { name: "Add stories" }).click();
-  await host.getByRole("button", { name: "Vote on Login page" }).click();
+  await host.getByLabel("New stories").fill("Login page\nSignup page");
+  await host.getByRole("button", { name: "Add to list" }).click();
+  await host.getByRole("button", { name: "Start voting on Login page" }).click();
   for (const page of [host, ...Object.values(voters)]) {
     await expect(page.getByRole("heading", { level: 2, name: "Login page" })).toBeVisible();
   }
