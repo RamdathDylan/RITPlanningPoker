@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 import { NUMERIC_CARDS } from "../../../shared/events.js";
 import buttons from "./Button.module.css";
+import { cardFace } from "./CardDeck.jsx";
 import styles from "./RevealedRound.module.css";
 
 export function describeStats(stats) {
@@ -67,7 +68,7 @@ export default function RevealedRound({ room, disabled, onAction }) {
         {votes.map((vote) => (
           <li className={styles.vote} key={vote.participantId}>
             <span className={styles.voter}>{nameOf(vote.participantId)}</span>
-            <span className={styles.card}>{vote.value}</span>
+            <span className={styles.card}>{cardFace(vote.value)}</span>
           </li>
         ))}
       </ul>

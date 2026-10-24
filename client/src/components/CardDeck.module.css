@@ -49,6 +49,10 @@
   font-weight: var(--font-weight-bold);
 }
 
+.wordFace {
+  font-size: var(--font-size-sm);
+}
+
 .selected {
   border-color: var(--color-accent-text);
   border-width: var(--focus-ring-width);
