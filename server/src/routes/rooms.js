@@ -10,7 +10,6 @@ import { countLiveRooms, findRoomByCode, insertRoomWithFacilitator } from "../db
 import { createRateLimiter } from "../middleware/rate-limit.js";
 import { validateBody } from "../middleware/validate.js";
 import { generateJoinCode } from "../rooms/code.js";
-import { isFacilitator } from "../rooms/state.js";
 
 const MAX_CODE_ATTEMPTS = 3;
 const UNIQUE_VIOLATION = "23505";
@@ -139,11 +138,9 @@ export function createRoomsRouter({
       sendError(response, 404, "NOT_FOUND");
       return;
     }
+    // Anyone seated in the room may download its results (stories and final estimates only;
+    // never individual votes or names).
     const state = await roomService.getRoom(room.id);
-    if (!isFacilitator(state, participant.id)) {
-      sendError(response, 403, "FORBIDDEN");
-      return;
-    }
 
     const stories = [...state.stories].sort((a, b) => a.position - b.position);
     const csv = toCsv([

@@ -185,10 +185,7 @@ export default function RoomPage() {
             <FacilitatorBar room={room} disabled={reconnecting} onAction={runAction} />
           )}
           {room.room.status === "ended" && (
-            <SessionSummary
-              stories={room.stories}
-              onExport={room.me.isFacilitator ? handleExport : undefined}
-            />
+            <SessionSummary stories={room.stories} onExport={handleExport} />
           )}
           {room.me.isFacilitator && (
             <div className={styles.danger}>
