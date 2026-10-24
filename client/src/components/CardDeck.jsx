@@ -4,6 +4,14 @@ import { CheckIcon } from "./icons.jsx";
 
 const SPECIAL_NAMES = { "?": "Unsure", "☕": "Need a break" };
 
+// What a card shows. The break card's stored value stays "☕" (used by the server and
+// database); it is shown as a word, which reads clearly on every screen.
+const SPECIAL_FACES = { "☕": "Break" };
+
+export function cardFace(value) {
+  return SPECIAL_FACES[value] ?? value;
+}
+
 export function cardName(value) {
   return SPECIAL_NAMES[value] ?? `${value} ${value === "1" ? "point" : "points"}`;
 }
@@ -64,7 +72,13 @@ export default function CardDeck({ cards, selected, onSelect, disabled = false }
               onFocus={() => setFocusIndex(index)}
               onClick={() => onSelect(isSelected ? null : value)}
             >
-              <span className={styles.face}>{value}</span>
+              <span
+                className={
+                  value in SPECIAL_FACES ? `${styles.face} ${styles.wordFace}` : styles.face
+                }
+              >
+                {cardFace(value)}
+              </span>
               {/* A visible non-color cue; screen readers hear "pressed" via aria-pressed. */}
               {isSelected && (
                 <span className={styles.selectedMark}>
