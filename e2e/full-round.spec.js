@@ -89,4 +89,13 @@ test("four voters and a facilitator complete a round", async ({ browser }, testI
   expect(await readFile(await download.path(), "utf8")).toBe(
     '"Story","Final estimate"\r\n"Login page","3"\r\n"Signup page",""\r\n',
   );
+
+  // Every participant can download the results, not only the facilitator.
+  const voter = voters["Voter 3"];
+  const voterDownloading = voter.waitForEvent("download");
+  await voter.getByRole("button", { name: "Download CSV" }).click();
+  const voterDownload = await voterDownloading;
+  expect(await readFile(await voterDownload.path(), "utf8")).toBe(
+    await readFile(await download.path(), "utf8"),
+  );
 });

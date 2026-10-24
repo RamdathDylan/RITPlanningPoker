@@ -200,12 +200,12 @@ Transport limits: Socket.IO `maxHttpBufferSize` is 64 KB, enough for 50 titles o
 
 ## 6. HTTP API
 
-| Route                                | Body / auth                                        | Success                                    | Limits                                                                      |
-| ------------------------------------ | -------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------- |
-| `POST /api/rooms`                    | `{ roomName ≤ 60, displayName ≤ 40 }`              | `201 { code, participantId, rejoinToken }` | 5 per 10 min per IP; 503 `CAPACITY` past 200 live rooms                     |
-| `POST /api/rooms/:code/participants` | `{ displayName ≤ 40, role }`                       | `201 { participantId, rejoinToken }`       | 60 per min per IP (sized for a class sharing one IP, see threat model T-09) |
-| `GET /api/rooms/:code/export.csv`    | `Authorization: Bearer <token>` of the facilitator | `200 text/csv` attachment                  | 10 per min per IP                                                           |
-| `GET /health`                        | —                                                  | `200 { "status": "ok" }`                   | none                                                                        |
+| Route                                | Body / auth                                                    | Success                                    | Limits                                                                      |
+| ------------------------------------ | -------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------- |
+| `POST /api/rooms`                    | `{ roomName ≤ 60, displayName ≤ 40 }`                          | `201 { code, participantId, rejoinToken }` | 5 per 10 min per IP; 503 `CAPACITY` past 200 live rooms                     |
+| `POST /api/rooms/:code/participants` | `{ displayName ≤ 40, role }`                                   | `201 { participantId, rejoinToken }`       | 60 per min per IP (sized for a class sharing one IP, see threat model T-09) |
+| `GET /api/rooms/:code/export.csv`    | `Authorization: Bearer <token>` of any participant in the room | `200 text/csv` attachment                  | 10 per min per IP                                                           |
+| `GET /health`                        | —                                                              | `200 { "status": "ok" }`                   | none                                                                        |
 
 Unknown, ended-and-purged, and deleted codes all return the same `404 { error: "Room not found" }`. JSON bodies are capped at 10 KB. Errors are generic, and stack traces appear only in server logs.
 
