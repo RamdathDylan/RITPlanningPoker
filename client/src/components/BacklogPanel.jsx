@@ -88,10 +88,10 @@ export default function BacklogPanel({ room, disabled, onAction }) {
                     className={buttons.secondary}
                     type="button"
                     disabled={disabled}
-                    aria-label={`Vote on ${story.title}`}
+                    aria-label={`Start voting on ${story.title}`}
                     onClick={() => onAction("story:select", { storyId: story.id })}
                   >
-                    Vote
+                    Start voting
                   </button>
                 )}
               </li>
@@ -102,8 +102,8 @@ export default function BacklogPanel({ room, disabled, onAction }) {
           <form className={styles.form} onSubmit={handleAdd} noValidate>
             <TextField
               multiline
-              label="Add stories"
-              hint={`One story per line, up to ${LIMITS.storiesPerAdd} at a time.`}
+              label="New stories"
+              hint={`One per line, up to ${LIMITS.storiesPerAdd} at a time. Then choose Start voting on a story.`}
               name="stories"
               value={text}
               error={error}
@@ -113,7 +113,7 @@ export default function BacklogPanel({ room, disabled, onAction }) {
               }}
             />
             <button className={buttons.secondary} type="submit" disabled={disabled}>
-              Add stories
+              Add to list
             </button>
           </form>
         )}
