@@ -22,6 +22,12 @@
   --color-border-strong: #6b7280;
   --color-border-subtle: #e5e7eb;
 
+  /* RIT-style header: black band, white text, orange accent (same in both themes).
+   * RIT-inspired colors only; no RIT logos or marks (CLAUDE.md branding rule). */
+  --color-header-bg: #000000;
+  --color-header-text: #ffffff;
+  --color-brand: #f76902;
+
   /* Typography */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-size-xs: 0.75rem;
@@ -78,8 +84,11 @@
   --revealed-card-width: 6rem;
 }
 
+/* Dark theme: used when the device prefers dark and no theme was chosen, or when Dark was
+ * chosen in the theme switch. Keep these two blocks identical (tooling/theme-tokens.test.js). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --color-bg: #0f1115;
     --color-surface: #181b21;
     --color-surface-raised: #20242c;
@@ -99,6 +108,32 @@
     --shadow-2: 0 2px 8px rgb(0 0 0 / 0.5);
     --shadow-3: 0 8px 24px rgb(0 0 0 / 0.6);
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0f1115;
+  --color-surface: #181b21;
+  --color-surface-raised: #20242c;
+  --color-text: #e8eaed;
+  --color-text-muted: #a3a9b5;
+  --color-accent-fill: #f76902;
+  --color-on-accent: #0f1115;
+  --color-accent-text: #ff8a3d;
+  --color-selected-bg: #3a2414;
+  --color-success: #4ade80;
+  --color-danger: #f87171;
+  --color-warning: #fbbf24;
+  --color-border-strong: #8a919e;
+  --color-border-subtle: #2a2f38;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-2: 0 2px 8px rgb(0 0 0 / 0.5);
+  --shadow-3: 0 8px 24px rgb(0 0 0 / 0.6);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 @media (prefers-reduced-motion: reduce) {

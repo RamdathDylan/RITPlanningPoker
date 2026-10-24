@@ -1,0 +1,50 @@
+.switch {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: var(--border-width) solid var(--color-header-text);
+  border-radius: var(--radius-pill);
+}
+
+.legend {
+  position: absolute;
+  width: var(--hidden-size);
+  height: var(--hidden-size);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  color: var(--color-header-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+/* The real radio covers the option, invisible, so clicks and keyboard focus still use it. */
+.radio {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.option:has(.radio:checked) {
+  border-radius: var(--radius-pill);
+  background: var(--color-brand);
+  color: var(--color-header-bg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.option:has(.radio:focus-visible) {
+  border-radius: var(--radius-pill);
+  outline: var(--focus-ring-width) solid var(--color-brand);
+  outline-offset: var(--focus-ring-offset);
+}

@@ -34,4 +34,12 @@ describe("App routes", () => {
     );
     expect(screen.getByRole("contentinfo")).toBeTruthy();
   });
+
+  it("shows a site header with a home link and the theme switch on every page", () => {
+    renderAt("/no/such/page");
+
+    const header = screen.getByRole("banner");
+    expect(header.querySelector('a[href="/"]')?.textContent).toBe("Planning Poker");
+    expect(screen.getByRole("group", { name: "Theme" })).toBeTruthy();
+  });
 });
