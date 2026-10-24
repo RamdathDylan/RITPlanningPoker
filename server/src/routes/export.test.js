@@ -75,14 +75,20 @@ describe("GET /api/rooms/:code/export.csv", () => {
     );
   });
 
-  it("refuses a voter", async () => {
+  it("lets every participant download it, voters and observers alike", async () => {
     const { app, roomService } = buildApp();
     const room = await roomWithEstimates(app, roomService);
+    const observer = (
+      await request(app)
+        .post(`/api/rooms/${room.code}/participants`)
+        .send({ displayName: "Olive", role: "observer" })
+    ).body;
 
-    const response = await exportCsv(app, room.code, room.voterToken);
-
-    expect(response.status).toBe(403);
-    expect(response.body.code).toBe("FORBIDDEN");
+    for (const token of [room.voterToken, observer.rejoinToken]) {
+      const response = await exportCsv(app, room.code, token);
+      expect(response.status).toBe(200);
+      expect(response.text).toContain('"Login","5"');
+    }
   });
 
   it("requires the token in the Authorization header, never the URL", async () => {

@@ -17,7 +17,7 @@ function endedAs({ facilitator }) {
 }
 
 describe("exporting the summary", () => {
-  it("downloads a CSV for the facilitator using their stored token", async () => {
+  it("downloads a CSV for the facilitator using their seat", async () => {
     const file = new Blob(["csv"]);
     const calls = [];
     const saved = [];
@@ -33,10 +33,18 @@ describe("exporting the summary", () => {
     expect(saved).toEqual([[file, "planning-poker-ABCDEFGH.csv"]]);
   });
 
-  it("isn't offered to other participants", async () => {
-    const page = renderRoomPage();
+  it("is offered to every participant, using their own seat", async () => {
+    const file = new Blob(["csv"]);
+    const calls = [];
+    const page = renderRoomPage({
+      api: { exportCsv: async (...args) => (calls.push(args), file) },
+      saveFile: () => {},
+    });
     await page.joinWith(endedAs({ facilitator: false }));
-    expect(screen.queryByRole("button", { name: "Download CSV" })).toBeNull();
+
+    await page.user.click(screen.getByRole("button", { name: "Download CSV" }));
+
+    expect(calls).toEqual([["ABCDEFGH", "t".repeat(43)]]);
   });
 
   it("explains a failed download", async () => {
