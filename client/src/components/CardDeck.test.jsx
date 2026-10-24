@@ -109,4 +109,11 @@ describe("CardDeck", () => {
     renderDeck({ disabled: true });
     expect(screen.getAllByRole("button").filter((button) => button.disabled)).toHaveLength(10);
   });
+
+  it("shows the break card as the word Break, not an emoji", () => {
+    renderDeck();
+    const breakCard = card("Need a break");
+    expect(breakCard.textContent).toBe("Break");
+    expect(screen.queryByText("☕")).toBeNull();
+  });
 });

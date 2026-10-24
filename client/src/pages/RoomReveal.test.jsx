@@ -151,4 +151,26 @@ describe("reveal view", () => {
     await page.user.selectOptions(screen.getByLabelText("Final estimate"), "3");
     expect(screen.getByRole("button", { name: "Accept estimate" }).disabled).toBe(false);
   });
+
+  it("shows a revealed break vote as the word Break", async () => {
+    const reveal = {
+      roundId: "r1",
+      votes: [{ participantId: "riley", value: "☕" }],
+      stats: {
+        ...numericReveal.stats,
+        numericCount: 0,
+        breakCount: 1,
+        mean: null,
+        median: null,
+        min: null,
+        max: null,
+        suggestion: null,
+      },
+    };
+    await revealed({}, reveal);
+
+    const votes = within(screen.getByRole("list", { name: "Votes" })).getAllByRole("listitem");
+    expect(votes.map((item) => item.textContent)).toEqual(["RileyBreak"]);
+    expect(screen.getByText("1 need a break")).toBeTruthy();
+  });
 });
