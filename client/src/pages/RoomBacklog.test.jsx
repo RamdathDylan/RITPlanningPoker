@@ -18,7 +18,7 @@ function facilitatorView(overrides = {}) {
 }
 
 const backlog = () => screen.getByRole("region", { name: /Stories/ });
-const storyInput = () => screen.getByLabelText("Add stories");
+const storyInput = () => screen.getByLabelText("New stories");
 
 describe("backlog panel", () => {
   it("lists stories with their status in words", async () => {
@@ -50,7 +50,7 @@ describe("backlog panel", () => {
     await page.joinWith(facilitatorView());
 
     await page.user.type(storyInput(), "Profile page");
-    await page.user.click(screen.getByRole("button", { name: "Add stories" }));
+    await page.user.click(screen.getByRole("button", { name: "Add to list" }));
 
     expect(page.socket.emitted.at(-1)).toEqual({
       event: "story:add",
@@ -65,7 +65,7 @@ describe("backlog panel", () => {
 
     await page.user.click(storyInput());
     await page.user.paste("  First  \n\nSecond\n   \nThird\n");
-    await page.user.click(screen.getByRole("button", { name: "Add stories" }));
+    await page.user.click(screen.getByRole("button", { name: "Add to list" }));
 
     expect(page.socket.emitted.at(-1).payload).toEqual({ titles: ["First", "Second", "Third"] });
   });
@@ -76,7 +76,7 @@ describe("backlog panel", () => {
 
     await page.user.click(storyInput());
     await page.user.paste(Array.from({ length: 51 }, (_, index) => `Story ${index}`).join("\n"));
-    await page.user.click(screen.getByRole("button", { name: "Add stories" }));
+    await page.user.click(screen.getByRole("button", { name: "Add to list" }));
 
     expect(screen.getByText("Add at most 50 stories at a time.")).toBeTruthy();
     expect(page.socket.emitted.some((emit) => emit.event === "story:add")).toBe(false);
@@ -88,7 +88,7 @@ describe("backlog panel", () => {
 
     await page.user.click(storyInput());
     await page.user.paste(`Fine\n${"x".repeat(201)}`);
-    await page.user.click(screen.getByRole("button", { name: "Add stories" }));
+    await page.user.click(screen.getByRole("button", { name: "Add to list" }));
 
     expect(screen.getByText("Line 2: Use 1 to 200 characters.")).toBeTruthy();
   });
@@ -97,7 +97,7 @@ describe("backlog panel", () => {
     const page = renderRoomPage();
     await page.joinWith(facilitatorView());
 
-    await page.user.click(screen.getByRole("button", { name: "Vote on Reset password" }));
+    await page.user.click(screen.getByRole("button", { name: "Start voting on Reset password" }));
 
     expect(page.socket.emitted.at(-1)).toEqual({
       event: "story:select",
@@ -109,8 +109,8 @@ describe("backlog panel", () => {
     const page = renderRoomPage();
     await page.joinWith(snapshot({ stories }));
 
-    expect(screen.queryByLabelText("Add stories")).toBeNull();
-    expect(screen.queryByRole("button", { name: /^Vote on / })).toBeNull();
+    expect(screen.queryByLabelText("New stories")).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Start voting on / })).toBeNull();
   });
 
   it("can be collapsed and expanded", async () => {

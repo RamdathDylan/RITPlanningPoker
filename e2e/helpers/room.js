@@ -46,7 +46,7 @@ export async function joinRoom(browser, code, displayName) {
 
 export async function startVoting(host, title = "Login page") {
   await openStories(host);
-  await host.getByLabel("Add stories").fill(title);
-  await host.getByRole("button", { name: "Add stories" }).click();
-  await host.getByRole("button", { name: `Vote on ${title}` }).click();
+  await host.getByLabel("New stories").fill(title);
+  await host.getByRole("button", { name: "Add to list" }).click();
+  await host.getByRole("button", { name: `Start voting on ${title}` }).click();
 }
