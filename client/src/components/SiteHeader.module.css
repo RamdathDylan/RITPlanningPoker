@@ -1,0 +1,31 @@
+.header {
+  border-bottom: var(--space-1) solid var(--color-brand);
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
+}
+
+.inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  padding: var(--space-2) var(--space-4);
+}
+
+.brand {
+  color: var(--color-header-text);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+.brand:hover {
+  text-decoration: underline;
+}
+
+.brand:focus-visible {
+  outline-color: var(--color-brand);
+}
